@@ -27,27 +27,27 @@ const options = {
 
   getCategoryName(slug) {
     if (this.categoryOptions.hasOwnProperty(slug)) {
-      return this.categoryOptions[slug]
+      return this.categoryOptions[slug];
     }
 
-    return ''
+    return '';
   },
 
   getTimezoneName(slug) {
     if (this.timezoneOptions.hasOwnProperty(slug)) {
-      return this.timezoneOptions[slug]
+      return this.timezoneOptions[slug];
     }
 
-    return ''
+    return '';
   },
 
   getCategoryUrl(slug) {
-    return '/category/' + slug
+    return '/category/' + slug;
   },
 
   getTimezoneUrl(slug) {
-    return '/timezone/' + slug
+    return '/timezone/' + slug;
   }
-}
+};
 
-export default options
+export default options;

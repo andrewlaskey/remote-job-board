@@ -1,37 +1,31 @@
 <template>
   <section class="container">
     <div>
-      <logo />
-      <h1 class="title">
-        remote-job-board
-      </h1>
-      <h2 class="subtitle">
-        JAMstack job board
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green"
-        >Documentation</a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-        >GitHub</a>
-      </div>
+      <posts-list :posts="posts" />
     </div>
   </section>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import fb from '~/helpers/firebase.js';
+import PostsList from '~/components/PostsList.vue';
 
 export default {
   components: {
-    Logo
+    PostsList
+  },
+  async asyncData(context) {
+    try {
+      const posts = await fb.getPosts();
+
+      return {
+        posts
+      };
+    } catch (error) {}
+
+    return {};
   }
-}
+};
 </script>
 
 <style>

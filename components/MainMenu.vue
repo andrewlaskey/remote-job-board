@@ -19,7 +19,9 @@
           <div class="navbar-item has-dropdown is-hoverable">
             <nuxt-link class="navbar-link" to="/">Find a Job</nuxt-link>
             <div class="navbar-dropdown is-boxed">
-              <nuxt-link class="navbar-item" v-for="(name, slug) in categories" :key="slug" :to="categoryUrl(slug)">{{ name }}</nuxt-link>
+              <nuxt-link v-for="(name, slug) in categories" :key="slug" class="navbar-item"  :to="categoryUrl(slug)">
+                {{ name }}
+              </nuxt-link>
             </div>
           </div>
 
@@ -47,7 +49,7 @@
 </template>
 
 <script>
-import options from './../helpers/options.js'
+import options from './../helpers/options.js';
 
 export default {
   name: 'MainMenu',
@@ -59,15 +61,15 @@ export default {
   data() {
     return {
       categories: {}
-    }
+    };
   },
 
   mounted() {
-    this.categories = options.categoryOptions
+    this.categories = options.categoryOptions;
   },
 
   methods: {
     categoryUrl: options.getCategoryUrl
   }
-}
+};
 </script>
