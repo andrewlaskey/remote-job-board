@@ -62,6 +62,25 @@ const fb = {
     return undefined;
   },
 
+  async getPostsByTimezone(timezone, published = true) {
+    const timezoneQuery = 'timezones.' + timezone;
+
+    try {
+      const collection = getCollection(published);
+      const posts = await collection
+        .where(timezoneQuery, '>', 0)
+        .orderBy(timezoneQuery, 'desc')
+        .get()
+        .then(buildPostListFromQuery);
+
+      return posts;
+    } catch (error) {
+      logError(error);
+    }
+
+    return undefined;
+  },
+
   async getPostBySlug(slug) {
     const db = firebase.firestore();
 
