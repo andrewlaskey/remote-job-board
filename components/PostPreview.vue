@@ -2,17 +2,23 @@
   <div class="job-preview columns">
     <div class="column is-one-third">
       <h4 class="title is-4">
-        <nuxt-link :to="postUrl">{{post.title}}</nuxt-link>
+        <nuxt-link :to="postUrl">
+          {{ post.title }}
+        </nuxt-link>
       </h4>
     </div>
     <div class="column">
-      <nuxt-link :to="categoryUrl(post.category)">{{categoryName(post.category)}}</nuxt-link>
+      <nuxt-link :to="categoryUrl(post.category)">
+        {{ categoryName(post.category) }}
+      </nuxt-link>
     </div>
     <div class="column">
-      <nuxt-link :to="timezoneUrl(slug)" v-for="(value, slug) in post.timezones" :key="slug">{{timezoneName(slug)}}</nuxt-link>
+      <nuxt-link v-for="(value, slug) in post.timezones" :key="slug" :to="timezoneUrl(slug)">
+        {{ timezoneName(slug) }}
+      </nuxt-link>
     </div>
     <div class="column">
-      <span>{{postDateFormatted}}</span>
+      <span>{{ postDateFormatted }}</span>
     </div>
   </div>
 </template>
@@ -23,7 +29,21 @@ import options from './../helpers/options.js';
 
 export default {
   name: 'PostPreview',
-  props: ['post', 'edit'],
+  props: {
+    post: {
+      type: Object,
+      default: function() {
+        return {
+          title: '',
+          createDate: 0,
+          slug: '',
+          category: '',
+          timezone: ''
+        };
+      }
+    },
+    edit: Boolean
+  },
   data() {
     return {};
   },

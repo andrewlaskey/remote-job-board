@@ -13,13 +13,14 @@
       </div>
 
       <div id="navbarExampleTransparentExample" class="navbar-menu">
-
         <!-- Navbar End -->
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">
-            <nuxt-link class="navbar-link" to="/">Find a Job</nuxt-link>
+            <nuxt-link class="navbar-link" to="/">
+              Find a Job
+            </nuxt-link>
             <div class="navbar-dropdown is-boxed">
-              <nuxt-link v-for="(name, slug) in categories" :key="slug" class="navbar-item"  :to="categoryUrl(slug)">
+              <nuxt-link v-for="(name, slug) in categories" :key="slug" class="navbar-item" :to="categoryUrl(slug)">
                 {{ name }}
               </nuxt-link>
             </div>
@@ -27,7 +28,6 @@
 
           <div class="navbar-item">
             <div class="field is-grouped">
-              
               <p class="control">
                 <nuxt-link class="button" to="/new">
                   <span class="icon">
@@ -42,7 +42,6 @@
           </div>
         </div>
         <!-- /Navbar End -->
-
       </div>
     </nav>
   </div>
@@ -56,13 +55,13 @@ export default {
 
   components: {},
 
-  computed: {},
-
   data() {
     return {
       categories: {}
     };
   },
+
+  computed: {},
 
   mounted() {
     this.categories = options.categoryOptions;
