@@ -1,25 +1,25 @@
 <template>
   <section class="container">
     <div>
-      <posts-list :posts="posts" />
+      <post-detail :post="post" />
     </div>
   </section>
 </template>
 
 <script>
 import fb from '~/helpers/firebase.js';
-import PostsList from '~/components/PostsList.vue';
+import PostDetail from '~/components/PostDetail.vue';
 
 export default {
   components: {
-    PostsList
+    PostDetail
   },
-  async asyncData(context) {
+  async asyncData({ params }) {
     try {
-      const posts = await fb.getPosts();
+      const post = await fb.getPostBySlug(params.postSlug);
 
       return {
-        posts
+        post
       };
     } catch (error) {}
 
