@@ -1,14 +1,14 @@
 <template>
   <div class="columns is-centered">
     <form class="column is-half">
-      <h3>Post a New Job</h3>
+      <h1 class="title is-1">Post a New Job</h1>
 
       <div class="field">
         <label class="label">
           Job Title
         </label>
         <div class="control">
-          <input v-model="title" class="input" type="text" placeholder="ex: Front End Developer">
+          <input v-model="title" class="input" type="text" placeholder="ex: Front End Developer" required>
         </div>
       </div>
 
@@ -17,7 +17,7 @@
           Job Description
         </label>
         <div class="control">
-          <textarea v-model="description" class="textarea" placeholder="Describe the position and your ideal "></textarea>
+          <textarea v-model="description" class="textarea" placeholder="Describe the position and your ideal " required></textarea>
         </div>
       </div>
 
@@ -48,8 +48,11 @@
       </div>
 
       <div class="field">
+        <label class="label">
+          Timezones
+        </label>
         <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox" >
-          <input type="checkbox" v-model="timezones">
+          <input type="checkbox" v-bind:value="key" v-model="timezones">
           <span>{{ value }}</span>
         </label>
       </div>
@@ -59,7 +62,7 @@
           How to Apply
         </label>
         <div class="control">
-          <textarea v-model="howToApply" class="textarea" placeholder="How should potential hires apply for this position"></textarea>
+          <textarea v-model="howToApply" class="textarea" placeholder="How should potential hires apply for this position" required></textarea>
         </div>
       </div>
 
@@ -68,18 +71,18 @@
           Email or Application URL (optional)
         </label>
         <div class="control">
-          <input v-model="applyUrl" class="input" type="text" placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere">
+          <input v-model="applyUrl" class="input" type="text" placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere" required>
         </div>
       </div>
 
-      <h4>Your Company</h4>
+      <h2 class="title is-3">Your Company</h2>
 
       <div class="field">
         <label class="label">
           Company Name
         </label>
         <div class="control">
-          <input v-model="companyName" class="input" type="text" placeholder="ex: Widget Co.">
+          <input v-model="companyName" class="input" type="text" placeholder="ex: Widget Co." required>
         </div>
       </div>
 
@@ -88,7 +91,32 @@
           Website
         </label>
         <div class="control">
-          <input v-model="companyUrl" class="input" type="text" placeholder="ex: https://widget.co">
+          <input v-model="companyUrl" class="input" type="text" placeholder="ex: https://widget.co" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Company Logo</label>
+        <figure class="image is-128x128" v-show="hasLogo">
+          <img :src="companyLogo" alt="Your company's logo" />
+          <button class="button image-reset" v-on:click.prevent="removeLogo">
+            <span class="icon is-small">
+              <fa :icon="['fas', 'times-circle']" />
+            </span>
+          </button>
+        </figure>
+        <div class="file" v-show="!hasLogo">
+          <label class="file-label">
+            <input id="logo-input" class="file-input" type="file" name="logo" v-on:change="onFileChange">
+            <span class="file-cta">
+              <span class="file-icon">
+                <fa :icon="['fas', 'upload']" />
+              </span>
+              <span class="file-label">
+                Choose a file…
+              </span>
+            </span>
+          </label>
         </div>
       </div>
 
@@ -99,6 +127,10 @@
           </button>
         </div>
       </div>
+
+      <div class="notification is-warning" v-show="isError">
+        {{ errorMsg }}
+      </div>
     </form>
   </div>
 </template>
@@ -107,6 +139,7 @@
 import slugify from 'slugify';
 import { log } from '~/helpers/logs.js';
 import options from './../helpers/options.js';
+import fb from './../helpers/firebase.js';
 
 export default {
   name: 'PostForm',
@@ -119,7 +152,7 @@ export default {
       categories: {},
       category: 'code',
       timezoneOptions: {},
-      timezones: {},
+      timezones: [],
       typeOptions: {},
       type: 'full-time',
       howToApply: '',
@@ -128,7 +161,9 @@ export default {
       companyUrl: '',
       companyLogo: '',
       status: 'unpaid',
-      hasLogo: false
+      hasLogo: false,
+      isError: false,
+      errorMsg: ''
     };
   },
 
@@ -145,13 +180,114 @@ export default {
       return slugify(str, { lower: true }) + '-' + Date.now().toString(36);
     },
 
-    createNewPost() {
+    validateForm() {
+      if (this.title.length === 0) {
+        return false;
+      }
+
+      if (this.description.length === 0) {
+        return false;
+      }
+
+      if (this.companyName.length === 0) {
+        return false;
+      }
+
+      if (this.companyUrl.length === 0) {
+        return false;
+      }
+
+      if (this.howToApply.length === 0) {
+        return false;
+      }
+
+      return true;
+    },
+
+    onError(msg) {
+      this.isError = true;
+      this.errorMsg = msg;
+    },
+
+    onFileChange(e) {
+      const input = e.target;
+
+      if (input.files && input.files[0]) {
+        if (!input.files[0].type.startsWith('image/')) {
+          this.onError('Wrong file type');
+          return;
+        }
+
+        this.hasLogo = true;
+        this.companyLogo = window.URL.createObjectURL(input.files[0]);
+      }
+    },
+
+    removeLogo() {
+      this.hasLogo = false;
+      this.companyLogo = '';
+      document.querySelector('#logo-input').value = '';
+    },
+
+    selectedTimezones(timezoneArray) {
+      // prettier-ignore
+      return Object.values(timezoneArray).reduce((selectedTimezones, timezone) => {
+        selectedTimezones[timezone] = Date.now();
+        return selectedTimezones;
+      }, {});
+    },
+
+    async createNewPost() {
       // Validate form - All fields filled out
-      
+      const validForm = this.validateForm();
+
+      if (!validForm) {
+        this.onError('Please make sure all fields are filled out.');
+        return false;
+      }
+
       this.slug = this.createPostSlug(this.title);
 
-      log(this.slug);
+      try {
+        const uploadFile = document.querySelector('#logo-input').value;
+        let logoSaveUrlPath = '';
+
+        if (uploadFile) {
+          logoSaveUrlPath = await fb.uploadFile(uploadFile);
+        }
+
+        const newPost = {
+          title: this.title,
+          description: this.description,
+          slug: this.slug,
+          category: this.category,
+          timezones: this.selectedTimezones(this.timezones),
+          type: this.type,
+          howToApply: this.howToApply,
+          applyUrl: this.applyUrl,
+          companyName: this.companyName,
+          companyUrl: this.companyUrl,
+          companyLogo: logoSaveUrlPath
+        };
+
+        log(newPost);
+      } catch (error) {
+        // prettier-ignore
+        this.onError(`There was a problem creating this post. Contact support.`);
+      }
     }
   }
 };
 </script>
+
+<style>
+.checkbox {
+  display: block;
+}
+
+.image-reset {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+</style>
