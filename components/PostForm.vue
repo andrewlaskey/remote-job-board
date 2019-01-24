@@ -131,6 +131,10 @@
       <div class="notification is-warning" v-show="isError">
         {{ errorMsg }}
       </div>
+
+      <div class="notification is-success" v-show="submitSuccess">
+        Your job was posted!
+      </div>
     </form>
   </div>
 </template>
@@ -163,6 +167,7 @@ export default {
       status: 'unpaid',
       hasLogo: false,
       isError: false,
+      submitSuccess: false,
       errorMsg: ''
     };
   },
@@ -238,6 +243,9 @@ export default {
     },
 
     async createNewPost() {
+      // Reset errors
+      this.isError = false;
+
       // Validate form - All fields filled out
       const validForm = this.validateForm();
 
@@ -256,7 +264,7 @@ export default {
           logoSaveUrlPath = await fb.uploadFile(uploadFile);
         }
 
-        const newPost = {
+        const post = {
           title: this.title,
           description: this.description,
           slug: this.slug,
@@ -267,10 +275,20 @@ export default {
           applyUrl: this.applyUrl,
           companyName: this.companyName,
           companyUrl: this.companyUrl,
-          companyLogo: logoSaveUrlPath
+          companyLogo: logoSaveUrlPath,
+          paymentStatus: 'paid',
+          publishStatus: 'unpublished',
+          token:'tok_fakestripetoken'
         };
 
-        log(newPost);
+        const newPostId = await fb.createPost(post);
+
+        if (newPostId) {
+          this.submitSuccess = true;
+          log(newPostId);
+        } else {
+          throw new Error('Error creating post');
+        }
       } catch (error) {
         // prettier-ignore
         this.onError(`There was a problem creating this post. Contact support.`);
