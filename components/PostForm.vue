@@ -278,7 +278,7 @@ export default {
           companyLogo: logoSaveUrlPath,
           paymentStatus: 'paid',
           publishStatus: 'unpublished',
-          token:'tok_fakestripetoken'
+          token: 'tok_fakestripetoken'
         };
 
         const newPostId = await fb.createPost(post);
