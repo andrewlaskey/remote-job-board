@@ -85,3 +85,4 @@ sw.*
 
 # Private config files
 firebase.config.js
+stripe.config.js
