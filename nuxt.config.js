@@ -38,7 +38,10 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/vue-stripe'
+    {
+      src: '~/plugins/vue-stripe',
+      ssr: false
+    }
   ],
 
   /*

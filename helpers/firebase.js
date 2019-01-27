@@ -141,6 +141,23 @@ const fb = {
     }
 
     return false;
+  },
+
+  async addPrivateData(email, token, postRef) {
+    const db = firebase.firestore();
+
+    try {
+      const privateData = await db.collection(`jobs/${postRef}/private`).add({
+        email,
+        token
+      });
+
+      return privateData.id;
+    } catch (error) {
+      logError(error);
+    }
+
+    return false;
   }
 };
 

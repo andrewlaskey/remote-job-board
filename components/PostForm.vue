@@ -1,7 +1,9 @@
 <template>
   <div class="columns is-centered">
     <form class="column is-half">
-      <h1 class="title is-1">Post a New Job</h1>
+      <h1 class="title is-1">
+        Post a New Job
+      </h1>
 
       <div class="field">
         <label class="label">
@@ -122,20 +124,32 @@
 
       <div class="field">
         <div class="control">
-          <button class="button is-primary" v-on:click.prevent="createNewPost">
+          <button class="button is-primary" v-on:click.prevent="checkout">
             Pay and Post Job
           </button>
         </div>
       </div>
 
-      <div class="notification is-warning" v-show="isError">
+      <div v-show="isError" class="notification is-warning">
         {{ errorMsg }}
       </div>
 
-      <div class="notification is-success" v-show="submitSuccess">
+      <div v-show="submitSuccess" class="notification is-success">
         Your job was posted!
       </div>
     </form>
+    <vue-stripe-checkout
+      ref="checkoutRef"
+      :image="image"
+      :name="name"
+      :description="stripeDescription"
+      :amount="amount"
+      :allow-remember-me="false"
+      @done="done"
+      @opened="opened"
+      @closed="closed"
+      @canceled="canceled"
+    ></vue-stripe-checkout>
   </div>
 </template>
 
@@ -168,7 +182,11 @@ export default {
       hasLogo: false,
       isError: false,
       submitSuccess: false,
-      errorMsg: ''
+      errorMsg: '',
+      image: 'https://i.imgur.com/HhqxVCW.jpg',
+      name: 'Remote Work List',
+      stripeDescription: '60-day job listing',
+      amount: 7500
     };
   },
 
@@ -242,18 +260,7 @@ export default {
       }, {});
     },
 
-    async createNewPost() {
-      // Reset errors
-      this.isError = false;
-
-      // Validate form - All fields filled out
-      const validForm = this.validateForm();
-
-      if (!validForm) {
-        this.onError('Please make sure all fields are filled out.');
-        return false;
-      }
-
+    async createNewPost(tokenId, email) {
       this.slug = this.createPostSlug(this.title);
 
       try {
@@ -277,8 +284,7 @@ export default {
           companyUrl: this.companyUrl,
           companyLogo: logoSaveUrlPath,
           paymentStatus: 'paid',
-          publishStatus: 'unpublished',
-          token: 'tok_fakestripetoken'
+          publishStatus: 'unpublished'
         };
 
         const newPostId = await fb.createPost(post);
@@ -286,6 +292,15 @@ export default {
         if (newPostId) {
           this.submitSuccess = true;
           log(newPostId);
+
+          const updatePrivateData = await fb.addPrivateData(
+            email,
+            tokenId,
+            newPostId
+          );
+
+          log(updatePrivateData);
+          return true;
         } else {
           throw new Error('Error creating post');
         }
@@ -293,6 +308,47 @@ export default {
         // prettier-ignore
         this.onError(`There was a problem creating this post. Contact support.`);
       }
+
+      return false;
+    },
+
+    async checkout() {
+      // Reset errors
+      this.isError = false;
+
+      // Validate form - All fields filled out
+      const validForm = this.validateForm();
+
+      if (!validForm) {
+        this.onError('Please make sure all fields are filled out.');
+        return false;
+      }
+
+      // Do Stripe stuff
+      const { token } = await this.$refs.checkoutRef.open();
+
+      const addedPost = await this.createNewPost(token.id, token.email);
+
+      this.submitSuccess = addedPost;
+    },
+    done({ token, args }) {
+      // token - is the token object
+      // args - is an object containing the billing and shipping address if enabled
+      // do stuff...
+      log('Done');
+      log(token);
+    },
+    opened() {
+      // do stuff
+      log('Opened');
+    },
+    closed() {
+      // do stuff
+      log('Closed');
+    },
+    canceled() {
+      // do stuff
+      log('Canceled');
     }
   }
 };
