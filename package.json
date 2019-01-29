@@ -20,6 +20,8 @@
     "@nuxtjs/pwa": "^2.6.0",
     "cross-env": "^5.2.0",
     "firebase": "^5.8.0",
+    "firebase-admin": "^6.5.1",
+    "firebase-functions": "^2.1.0",
     "moment": "^2.23.0",
     "nuxt": "^2.3.4",
     "nuxt-fontawesome": "^0.4.0",
