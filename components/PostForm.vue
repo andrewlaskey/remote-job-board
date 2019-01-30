@@ -53,7 +53,7 @@
         <label class="label">
           Timezones
         </label>
-        <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox" >
+        <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox">
           <input type="checkbox" v-bind:value="key" v-model="timezones">
           <span>{{ value }}</span>
         </label>

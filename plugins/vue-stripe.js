@@ -1,5 +1,5 @@
 import Vue from 'vue';
 import VueStripeCheckout from 'vue-stripe-checkout';
-import { StripeConfig } from './../stripe.config.js';
+import { publishableKey as stripePubKey } from './../stripe.config.js';
 
-Vue.use(VueStripeCheckout, StripeConfig.publishableKey);
+Vue.use(VueStripeCheckout, stripePubKey);
