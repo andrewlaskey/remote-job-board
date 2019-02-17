@@ -155,6 +155,7 @@
 
 <script>
 import slugify from 'slugify';
+import axios from 'axios';
 import { log } from '~/helpers/logs.js';
 import options from './../helpers/options.js';
 import fb from './../helpers/firebase.js';
@@ -299,8 +300,18 @@ export default {
             newPostId
           );
 
-          log(updatePrivateData);
-          return true;
+          const chargeApi = `https://us-central1-remote-job-board.cloudfunctions.net/charge`;
+
+          const tryCharge = await axios.post(chargeApi, {
+            jobId: newPostId,
+            token: tokenId,
+            privateDataId: updatePrivateData
+          });
+
+          // eslint-disable-next-line
+          if (tryCharge && tryCharge.data && tryCharge.data.chargeSuccess) {
+            return true;
+          }
         } else {
           throw new Error('Error creating post');
         }

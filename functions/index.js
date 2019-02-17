@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const cors = require('cors')({ origin: true });
 const stripe = require('stripe')(functions.config().stripe.token);
 const currency = 'usd';
 const amount = 7500;
@@ -6,12 +7,11 @@ const amount = 7500;
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-exports.chargeCard = functions.firestore
-  .document('/jobs/{jobId}/private/{privateDataId}')
-  .onCreate((snap, context) => {
-    // context.params.jobId
-    // console.log(privateData, context.params.jobId);
-    const privateData = snap.data();
+exports.charge = functions.https.onRequest((req, res) => {
+  return cors(req, res, () => {
+    const token = req.body.token,
+      privateDataId = req.body.privateDataId,
+      jobId = req.body.jobId;
 
     return stripe.charges
       .create(
@@ -19,24 +19,41 @@ exports.chargeCard = functions.firestore
           amount: amount,
           currency: currency,
           description: 'Remote Work List Job Post',
-          source: privateData.token
+          source: token
         },
         {
-          idempotency_key: context.params.privateDataId
+          idempotency_key: privateDataId
         }
       )
       .then(charge => {
         console.log(charge);
 
-        return snap.ref.update({
-          updated: true
-        });
+        /*eslint-disable */
+        return admin.firestore()
+          .collection(`jobs/${jobId}/private`)
+          .doc(privateDataId)
+          .update({ updated: true })
+          .then(() => {
+            return res.status(200).send({
+              chargeSuccess: true
+            });
+          });
+        /*eslint-enable */
       })
       .catch(error => {
         console.log(error);
 
-        return snap.ref.update({
-          updated: false
-        });
+        /*eslint-disable */
+        return admin.firestore()
+          .collection(`jobs/${jobId}/private`)
+          .doc(privateDataId)
+          .update({ updated: false })
+          .then(() => {
+            return res.status(200).send({
+              chargeSuccess: false
+            });
+          });
+        /*eslint-enable */
       });
   });
+});
