@@ -1,143 +1,146 @@
 <template>
   <div class="columns is-centered">
-    <form class="column is-half">
+    <div class="column is-half">
       <h1 class="title is-1">
         Post a New Job
       </h1>
+      <div v-if="submitSuccess != false" class="notification is-success">
+        <h3 class="title is-4">Thanks for listing with us!</h3>
+        <p>Your new job listing was submitted and pending approval.</p>
+        <p>View your listing's status <nuxt-link v-bind:to="`status/${submitSuccess}`">here.</nuxt-link></p>
+      </div>
+      <form v-if="submitSuccess == false">
 
-      <div class="field">
-        <label class="label">
-          Job Title
-        </label>
-        <div class="control">
-          <input v-model="title" class="input" type="text" placeholder="ex: Front End Developer" required>
+        <div class="field">
+          <label class="label">
+            Job Title
+          </label>
+          <div class="control">
+            <input v-model="title" class="input" type="text" placeholder="ex: Front End Developer" required>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">
-          Job Description
-        </label>
-        <div class="control">
-          <textarea v-model="description" class="textarea" placeholder="Describe the position and your ideal " required></textarea>
+        <div class="field">
+          <label class="label">
+            Job Description
+          </label>
+          <div class="control">
+            <textarea v-model="description" class="textarea" placeholder="Describe the position and your ideal " required></textarea>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">
-          Category
-        </label>
-        <div class="select">
-          <select v-model="category">
-            <option v-for="(value, key) in categories" v-bind:key="key" v-bind:value="key">
-              {{ value }}
-            </option>
-          </select>
+        <div class="field">
+          <label class="label">
+            Category
+          </label>
+          <div class="select">
+            <select v-model="category">
+              <option v-for="(value, key) in categories" v-bind:key="key" v-bind:value="key">
+                {{ value }}
+              </option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">
-          Type
-        </label>
-        <div class="select">
-          <select v-model="type">
-            <option v-for="(value, key) in typeOptions" v-bind:key="key" v-bind:value="key">
-              {{ value }}
-            </option>
-          </select>
+        <div class="field">
+          <label class="label">
+            Type
+          </label>
+          <div class="select">
+            <select v-model="type">
+              <option v-for="(value, key) in typeOptions" v-bind:key="key" v-bind:value="key">
+                {{ value }}
+              </option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">
-          Timezones
-        </label>
-        <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox">
-          <input type="checkbox" v-bind:value="key" v-model="timezones">
-          <span>{{ value }}</span>
-        </label>
-      </div>
-
-      <div class="field">
-        <label class="label">
-          How to Apply
-        </label>
-        <div class="control">
-          <textarea v-model="howToApply" class="textarea" placeholder="How should potential hires apply for this position" required></textarea>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">
-          Email or Application URL (optional)
-        </label>
-        <div class="control">
-          <input v-model="applyUrl" class="input" type="text" placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere" required>
-        </div>
-      </div>
-
-      <h2 class="title is-3">Your Company</h2>
-
-      <div class="field">
-        <label class="label">
-          Company Name
-        </label>
-        <div class="control">
-          <input v-model="companyName" class="input" type="text" placeholder="ex: Widget Co." required>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">
-          Website
-        </label>
-        <div class="control">
-          <input v-model="companyUrl" class="input" type="text" placeholder="ex: https://widget.co" required>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Company Logo</label>
-        <figure class="image is-128x128" v-show="hasLogo">
-          <img :src="companyLogo" alt="Your company's logo" />
-          <button class="button image-reset" v-on:click.prevent="removeLogo">
-            <span class="icon is-small">
-              <fa :icon="['fas', 'times-circle']" />
-            </span>
-          </button>
-        </figure>
-        <div class="file" v-show="!hasLogo">
-          <label class="file-label">
-            <input id="logo-input" class="file-input" type="file" name="logo" v-on:change="onFileChange">
-            <span class="file-cta">
-              <span class="file-icon">
-                <fa :icon="['fas', 'upload']" />
-              </span>
-              <span class="file-label">
-                Choose a file…
-              </span>
-            </span>
+        <div class="field">
+          <label class="label">
+            Timezones
+          </label>
+          <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox">
+            <input type="checkbox" v-bind:value="key" v-model="timezones">
+            <span>{{ value }}</span>
           </label>
         </div>
-      </div>
 
-      <div class="field">
-        <div class="control">
-          <button class="button is-primary" v-on:click.prevent="checkout">
-            Pay and Post Job
-          </button>
+        <div class="field">
+          <label class="label">
+            How to Apply
+          </label>
+          <div class="control">
+            <textarea v-model="howToApply" class="textarea" placeholder="How should potential hires apply for this position" required></textarea>
+          </div>
         </div>
-      </div>
 
-      <div v-show="isError" class="notification is-warning">
-        {{ errorMsg }}
-      </div>
+        <div class="field">
+          <label class="label">
+            Email or Application URL (optional)
+          </label>
+          <div class="control">
+            <input v-model="applyUrl" class="input" type="text" placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere" required>
+          </div>
+        </div>
 
-      <div v-show="submitSuccess" class="notification is-success">
-        Your job was posted!
-      </div>
-    </form>
+        <h2 class="title is-3">Your Company</h2>
+
+        <div class="field">
+          <label class="label">
+            Company Name
+          </label>
+          <div class="control">
+            <input v-model="companyName" class="input" type="text" placeholder="ex: Widget Co." required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Website
+          </label>
+          <div class="control">
+            <input v-model="companyUrl" class="input" type="text" placeholder="ex: https://widget.co" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Company Logo</label>
+          <figure class="image is-128x128" v-show="hasLogo">
+            <img :src="companyLogo" alt="Your company's logo" />
+            <button class="button image-reset" v-on:click.prevent="removeLogo">
+              <span class="icon is-small">
+                <fa :icon="['fas', 'times-circle']" />
+              </span>
+            </button>
+          </figure>
+          <div class="file" v-show="!hasLogo">
+            <label class="file-label">
+              <input id="logo-input" class="file-input" type="file" name="logo" v-on:change="onFileChange">
+              <span class="file-cta">
+                <span class="file-icon">
+                  <fa :icon="['fas', 'upload']" />
+                </span>
+                <span class="file-label">
+                  Choose a file…
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <button class="button is-primary" v-bind:class="{ 'is-loading' : isLoading }" v-on:click.prevent="checkout">
+              Pay and Post Job
+            </button>
+          </div>
+        </div>
+
+        <div v-if="isError" class="notification is-warning">
+          {{ errorMsg }}
+        </div>
+      </form>
+    </div>
     <vue-stripe-checkout
       ref="checkoutRef"
       :image="image"
@@ -182,6 +185,7 @@ export default {
       status: 'unpaid',
       hasLogo: false,
       isError: false,
+      isLoading: false,
       submitSuccess: false,
       errorMsg: '',
       image: 'https://i.imgur.com/HhqxVCW.jpg',
@@ -229,6 +233,7 @@ export default {
     },
 
     onError(msg) {
+      this.isLoading = false;
       this.isError = true;
       this.errorMsg = msg;
     },
@@ -284,14 +289,13 @@ export default {
           companyName: this.companyName,
           companyUrl: this.companyUrl,
           companyLogo: logoSaveUrlPath,
-          paymentStatus: 'paid',
-          publishStatus: 'unpublished'
+          createDate: Date.now(),
+          publishStatus: 'pending approval'
         };
 
         const newPostId = await fb.createPost(post);
 
         if (newPostId) {
-          this.submitSuccess = true;
           log(newPostId);
 
           const updatePrivateData = await fb.addPrivateData(
@@ -310,7 +314,7 @@ export default {
 
           // eslint-disable-next-line
           if (tryCharge && tryCharge.data && tryCharge.data.chargeSuccess) {
-            return true;
+            return newPostId;
           }
         } else {
           throw new Error('Error creating post');
@@ -326,6 +330,7 @@ export default {
     async checkout() {
       // Reset errors
       this.isError = false;
+      this.isLoading = true;
 
       // Validate form - All fields filled out
       const validForm = this.validateForm();
@@ -340,6 +345,7 @@ export default {
 
       const addedPost = await this.createNewPost(token.id, token.email);
 
+      this.isLoading = false;
       this.submitSuccess = addedPost;
     },
     done({ token, args }) {

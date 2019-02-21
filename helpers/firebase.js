@@ -81,6 +81,33 @@ const fb = {
     return undefined;
   },
 
+  async getPostStatus(id) {
+    const db = firebase.firestore();
+
+    try {
+      const post = await db
+        .collection(`status`)
+        .doc(id)
+        .get()
+        .then(doc => {
+          if (doc.exists) {
+            return {
+              id: doc.id,
+              ...doc.data()
+            };
+          }
+
+          return {};
+        });
+
+      return post;
+    } catch (error) {
+      logError(error);
+    }
+
+    return {};
+  },
+
   async getPostBySlug(slug) {
     const db = firebase.firestore();
 
@@ -115,6 +142,18 @@ const fb = {
 
     try {
       const newPost = await db.collection('jobs').add(post);
+
+      // Set the status in a separate, readable collection
+      const postStatus = {
+        title: post.title,
+        status: post.publishStatus,
+        createDate: post.createDate
+      };
+
+      await db
+        .collection('status')
+        .doc(newPost.id)
+        .set(postStatus);
 
       log('New job created at ' + newPost.id);
 
