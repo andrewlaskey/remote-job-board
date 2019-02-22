@@ -293,29 +293,17 @@ export default {
           publishStatus: 'pending approval'
         };
 
-        const newPostId = await fb.createPost(post);
+        const api = `https://us-central1-remote-job-board.cloudfunctions.net/processNewPost`;
 
-        if (newPostId) {
-          log(newPostId);
+        const tryCharge = await axios.post(api, {
+          token: tokenId,
+          email,
+          post
+        });
 
-          const updatePrivateData = await fb.addPrivateData(
-            email,
-            tokenId,
-            newPostId
-          );
-
-          const chargeApi = `https://us-central1-remote-job-board.cloudfunctions.net/charge`;
-
-          const tryCharge = await axios.post(chargeApi, {
-            jobId: newPostId,
-            token: tokenId,
-            privateDataId: updatePrivateData
-          });
-
-          // eslint-disable-next-line
-          if (tryCharge && tryCharge.data && tryCharge.data.chargeSuccess) {
-            return newPostId;
-          }
+        // eslint-disable-next-line
+        if (tryCharge && tryCharge.data) {
+          return tryCharge.data;
         } else {
           throw new Error('Error creating post');
         }
@@ -344,9 +332,9 @@ export default {
       const { token } = await this.$refs.checkoutRef.open();
 
       const addedPost = await this.createNewPost(token.id, token.email);
-
+      log(addedPost);
       this.isLoading = false;
-      this.submitSuccess = addedPost;
+      this.submitSuccess = true;
     },
     done({ token, args }) {
       // token - is the token object

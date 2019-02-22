@@ -7,11 +7,54 @@ const amount = 7500;
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-exports.charge = functions.https.onRequest((req, res) => {
+const createJobPost = async (post, stripeCharge, userEmail) => {
+  try {
+    const store = admin.firestore();
+    const newPost = await store.collection('jobs').add(post);
+
+    // Save public readable post status
+    await store
+      .collection('status')
+      .doc(newPost.id)
+      .set({
+        title: post.title,
+        status: post.publishStatus,
+        createDate: post.createDate
+      });
+
+    // Save private post data
+    await store
+      .collection('private')
+      .doc(newPost.id)
+      .set({
+        title: post.title,
+        user: userEmail,
+        stripeId: stripeCharge.id,
+        amount: stripeCharge.amount
+      });
+
+    return newPost.id;
+  } catch (err) {
+    console.log(err);
+    return undefined;
+  }
+};
+
+/*eslint-disable */
+exports.processNewPost = functions.https.onRequest((req, res) => {
   return cors(req, res, () => {
     const token = req.body.token,
-      privateDataId = req.body.privateDataId,
-      jobId = req.body.jobId;
+      post = req.body.post,
+      userEmail = req.body.email,
+      idempotencyKey = post.slug + post.createDate,
+      resPackage = {
+        error: false,
+        cardError: false,
+        chargeSuccess: false,
+        postCreate: false,
+        postId: false,
+        message: ''
+      };
 
     return stripe.charges
       .create(
@@ -22,38 +65,63 @@ exports.charge = functions.https.onRequest((req, res) => {
           source: token
         },
         {
-          idempotency_key: privateDataId
+          idempotency_key: idempotencyKey
         }
       )
-      .then(charge => {
-        console.log(charge);
+      .then(
+        charge => {
+          console.log(charge);
+          
+          return createJobPost(post, charge, userEmail)
+            .then(postId => {
+              resPackage.chargeSuccess = true;
+              resPackage.message = 'charge successful';
 
-        /*eslint-disable */
-        return admin.firestore()
-          .collection(`jobs/${jobId}/private`)
-          .doc(privateDataId)
-          .update({ updated: true })
-          .then(() => {
-            return res.status(200).send({
-              chargeSuccess: true
-            });
-          });
-        /*eslint-enable */
-      })
-      .catch(error => {
-        console.log(error);
+              if (postId) {
+                resPackage.postCreate = true;
+                resPackage.postId = postId;
+                resPackage.message = 'success';
+              }
 
-        /*eslint-disable */
-        return admin.firestore()
-          .collection(`jobs/${jobId}/private`)
-          .doc(privateDataId)
-          .update({ updated: false })
-          .then(() => {
-            return res.status(200).send({
-              chargeSuccess: false
+              return res.status(200).send(resPackage);
             });
-          });
-        /*eslint-enable */
+        },
+        err => {
+          console.log(err);
+          resPackage.error = true;
+
+          switch (err.type) {
+            case 'StripeCardError':
+              // A declined card error
+              resPackage.cardError = true;
+              resPackage.message = err.message; // => e.g. "Your card's expiration year is invalid."
+              break;
+            case 'RateLimitError':
+            // Too many requests made to the API too quickly
+            case 'StripeInvalidRequestError':
+            // Invalid parameters were supplied to Stripe's API
+            case 'StripeAPIError':
+            // An error occurred internally with Stripe's API
+            case 'StripeConnectionError':
+            // Some kind of error occurred during the HTTPS communication
+            case 'StripeAuthenticationError':
+            // You probably used an incorrect API key
+            default:
+              // Handle any other types of unexpected errors
+              resPackage.message = 'Stripe Error';
+              break;
+          }
+
+          return res.status(200).send(resPackage);
+        }
+      )
+      .catch(err => {
+        console.log(err);
+        resPackage.error = true;
+        resPackage.message = 'catch error';
+
+        return res.status(200).send(resPackage);
       });
   });
 });
+/*eslint-enable */
