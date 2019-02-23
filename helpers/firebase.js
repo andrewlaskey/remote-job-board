@@ -172,14 +172,14 @@ const fb = {
       const downloadPath = await storageRef
         .child('images/' + logoFile.name)
         .put(logoFile)
-        .then(snapshot => snapshot.downloadURL);
+        .then(snapshot => snapshot.ref.getDownloadURL());
 
       return downloadPath;
     } catch (error) {
       logError(error);
     }
 
-    return false;
+    return '';
   },
 
   async addPrivateData(email, token, postRef) {

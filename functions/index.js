@@ -49,7 +49,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
       idempotencyKey = post.slug + post.createDate,
       resPackage = {
         error: false,
-        cardError: false,
+        errorType: '',
         chargeSuccess: false,
         postCreate: false,
         postId: false,
@@ -71,16 +71,17 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
       .then(
         charge => {
           console.log(charge);
+          resPackage.chargeSuccess = true;
+          resPackage.message = 'charge successful';
           
           return createJobPost(post, charge, userEmail)
             .then(postId => {
-              resPackage.chargeSuccess = true;
-              resPackage.message = 'charge successful';
 
               if (postId) {
-                resPackage.postCreate = true;
                 resPackage.postId = postId;
                 resPackage.message = 'success';
+              } else {
+                resPackage.errorType = 'post';
               }
 
               return res.status(200).send(resPackage);
@@ -93,7 +94,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
           switch (err.type) {
             case 'StripeCardError':
               // A declined card error
-              resPackage.cardError = true;
+              resPackage.errorType = 'card';
               resPackage.message = err.message; // => e.g. "Your card's expiration year is invalid."
               break;
             case 'RateLimitError':
@@ -108,6 +109,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
             // You probably used an incorrect API key
             default:
               // Handle any other types of unexpected errors
+              resPackage.errorType = 'stripe';
               resPackage.message = 'Stripe Error';
               break;
           }
@@ -118,6 +120,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
       .catch(err => {
         console.log(err);
         resPackage.error = true;
+        resPackage.errorType = 'other';
         resPackage.message = 'catch error';
 
         return res.status(200).send(resPackage);
