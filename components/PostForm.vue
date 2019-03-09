@@ -27,7 +27,10 @@
             Job Description
           </label>
           <div class="control">
-            <textarea v-model="description" class="textarea" placeholder="Describe the position and your ideal " required></textarea>
+            <vue-editor
+              v-model="description"
+              :editorToolbar="customToolbar"
+              placeholder="Describe the position and your ideal candidate"></vue-editor>
           </div>
         </div>
 
@@ -72,7 +75,10 @@
             How to Apply
           </label>
           <div class="control">
-            <textarea v-model="howToApply" class="textarea" placeholder="How should potential hires apply for this position" required></textarea>
+            <vue-editor
+              v-model="howToApply"
+              :editorToolbar="customToolbar"
+              placeholder="How should potential hires apply for this position?"></vue-editor>
           </div>
         </div>
 
@@ -176,6 +182,7 @@
 </template>
 
 <script>
+import { VueEditor } from 'vue2-editor';
 import slugify from 'slugify';
 import axios from 'axios';
 import { log } from '~/helpers/logs.js';
@@ -187,7 +194,8 @@ export default {
   name: 'PostForm',
 
   components: {
-    PostDetail
+    PostDetail,
+    VueEditor
   },
 
   data() {
@@ -217,7 +225,19 @@ export default {
       image: 'https://i.imgur.com/HhqxVCW.jpg',
       name: 'Remote Work List',
       stripeDescription: '60-day job listing',
-      amount: 7500
+      amount: 7500,
+      customToolbar: [
+        [{ header: 1 }, { header: 2 }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [
+          {
+            list: 'ordered'
+          },
+          {
+            list: 'bullet'
+          }
+        ]
+      ]
     };
   },
 
