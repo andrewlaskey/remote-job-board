@@ -1,11 +1,14 @@
 <template>
   <div class="job-preview columns">
     <div class="column is-one-third">
-      <h4 class="title is-4">
-        <nuxt-link :to="postUrl">
+      <nuxt-link :to="postUrl">
+        <h4 class="title is-4">
           {{ post.title }}
-        </nuxt-link>
-      </h4>
+        </h4>
+        <h5 class="subtitle is-5">
+          {{ post.companyName }}
+        </h5>
+      </nuxt-link>
     </div>
     <div class="column">
       <nuxt-link :to="categoryUrl(post.category)">
@@ -35,6 +38,7 @@ export default {
       default: function() {
         return {
           title: '',
+          companyName: '',
           createDate: 0,
           slug: '',
           category: '',

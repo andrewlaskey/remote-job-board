@@ -5,14 +5,14 @@
         <nuxt-link class="navbar-item" to="/">
           <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28">
         </nuxt-link>
-        <div class="navbar-burger burger" data-target="navbarExampleTransparentExample">
+        <div class="navbar-burger burger">
           <span></span>
           <span></span>
           <span></span>
         </div>
       </div>
 
-      <div id="navbarExampleTransparentExample" class="navbar-menu">
+      <div class="navbar-menu">
         <!-- Navbar End -->
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">

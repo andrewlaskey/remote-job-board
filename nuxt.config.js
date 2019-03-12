@@ -31,8 +31,7 @@ module.exports = {
   /*
   ** Global CSS
   */
-  css: [
-  ],
+  css: ['@/assets/main.scss'],
 
   /*
   ** Plugins to load before mounting the App
@@ -49,7 +48,6 @@ module.exports = {
   */
   modules: [
     // Doc:https://github.com/nuxt-community/modules/tree/master/packages/bulma
-    '@nuxtjs/bulma',
     '@nuxtjs/pwa',
     'nuxt-fontawesome'
   ],
