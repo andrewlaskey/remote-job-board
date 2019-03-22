@@ -7,10 +7,10 @@
             <nuxt-link to="/">Home</nuxt-link>
           </div>
           <div class="level-item">
-            <nuxt-link to="/">About</nuxt-link>
+            <nuxt-link to="/about">About</nuxt-link>
           </div>
           <div class="level-item">
-            <nuxt-link to="/">Contact</nuxt-link>
+            <nuxt-link to="/contact">Contact</nuxt-link>
           </div>
           <div class="level-item">
             <nuxt-link to="/new">

@@ -1,6 +1,6 @@
 <template>
-  <section class="container">
-    <div>
+  <section class="section">
+    <div class="container">
       <post-form />
     </div>
   </section>

@@ -36,7 +36,10 @@ const fb = {
   async getPosts(published = true) {
     try {
       const collection = getCollection(published);
-      const posts = await collection.get().then(buildPostListFromQuery);
+      const posts = await collection
+        .orderBy('createDate', 'desc')
+        .get()
+        .then(buildPostListFromQuery);
 
       return posts;
     } catch (error) {
@@ -51,6 +54,7 @@ const fb = {
       const collection = getCollection(published);
       const posts = await collection
         .where('category', '==', category)
+        .orderBy('createDate', 'desc')
         .get()
         .then(buildPostListFromQuery);
 
@@ -109,11 +113,10 @@ const fb = {
   },
 
   async getPostBySlug(slug) {
-    const db = firebase.firestore();
-
     try {
-      const post = await db
-        .collection('jobs')
+      log(slug);
+      const collection = getCollection(true);
+      const post = await collection
         .where('slug', '==', slug)
         .get()
         .then(querySnapshot => {
@@ -129,6 +132,7 @@ const fb = {
 
       return post;
     } catch (error) {
+      logError('getPostBySlug');
       logError(error);
     }
 

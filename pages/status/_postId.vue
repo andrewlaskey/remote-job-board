@@ -1,8 +1,6 @@
 <template>
-  <section class="container">
-    <div>
-      <post-status :post="post" />
-    </div>
+  <section class="section">
+    <post-status :post="post" />
   </section>
 </template>
 

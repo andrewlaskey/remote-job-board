@@ -1,27 +1,29 @@
 <template>
-  <div class="job-preview columns">
-    <div class="column is-one-third">
-      <nuxt-link :to="postUrl">
-        <h4 class="title is-4">
-          {{ post.title }}
-        </h4>
-        <h5 class="subtitle is-5">
-          {{ post.companyName }}
-        </h5>
-      </nuxt-link>
-    </div>
-    <div class="column">
-      <nuxt-link :to="categoryUrl(post.category)">
-        {{ categoryName(post.category) }}
-      </nuxt-link>
-    </div>
-    <div class="column">
-      <nuxt-link v-for="(value, slug) in post.timezones" :key="slug" :to="timezoneUrl(slug)">
-        {{ timezoneName(slug) }}
-      </nuxt-link>
-    </div>
-    <div class="column">
-      <span>{{ postDateFormatted }}</span>
+  <div class="job-preview">
+    <div class="columns">
+      <div class="column is-one-third">
+        <nuxt-link :to="postUrl">
+          <h4 class="title is-4">
+            {{ post.title }}
+          </h4>
+          <h5 class="subtitle is-5">
+            {{ post.companyName }}
+          </h5>
+        </nuxt-link>
+      </div>
+      <div class="column">
+        <nuxt-link :to="categoryUrl(post.category)">
+          {{ categoryName(post.category) }}
+        </nuxt-link>
+      </div>
+      <div class="column">
+        <nuxt-link v-for="(value, slug) in post.timezones" :key="slug" :to="timezoneUrl(slug)">
+          {{ timezoneName(slug) }}
+        </nuxt-link>
+      </div>
+      <div class="column">
+        <span>{{ postDateFormatted }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -100,5 +102,12 @@ export default {
 
 .job-preview a {
   display: block;
+}
+
+.job-preview .columns {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 </style>

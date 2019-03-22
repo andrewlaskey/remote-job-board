@@ -18,7 +18,7 @@ const createJobPost = async (post, stripeCharge, userEmail) => {
       .doc(newPost.id)
       .set({
         title: post.title,
-        status: post.publishStatus,
+        status: post.status,
         createDate: post.createDate
       });
 

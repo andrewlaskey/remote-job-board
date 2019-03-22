@@ -1,7 +1,7 @@
 <template>
   <div class="columns is-centered">
-    <div class="column is-half">
-      <h1 class="title is-1">
+    <div class="column is-three-quarters">
+      <h1 class="title is-3 is-family-secondary">
         Post a New Job
       </h1>
       
@@ -91,8 +91,6 @@
           </div>
         </div>
 
-        <h2 class="title is-3">Your Company</h2>
-
         <div class="field">
           <label class="label">
             Company Name
@@ -112,7 +110,7 @@
         </div>
 
         <div class="field">
-          <label class="label">Company Logo</label>
+          <label class="label">Company Logo (optional)</label>
           <figure class="image is-128x128" v-show="hasLogo">
             <img :src="companyLogo" alt="Your company's logo" />
             <button class="button image-reset" v-on:click.prevent="removeLogo">
@@ -389,7 +387,7 @@ export default {
         companyUrl: this.companyUrl,
         companyLogo: logoUrl,
         createDate: Date.now(),
-        publishStatus: 'pending approval'
+        status: 'pending approval'
       };
     },
 
@@ -485,5 +483,20 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.control .ql-toolbar.ql-snow {
+  border-color: #dbdbdb;
+  border-width: 2px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.control .ql-container.ql-snow {
+  border-color: #dbdbdb;
+  border-width: 2px;
+  border-top: 0;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 </style>

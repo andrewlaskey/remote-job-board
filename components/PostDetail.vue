@@ -5,13 +5,11 @@
         {{ post.title }}
       </h1>
     </header>
-    <div class="content">
-      {{ post.description }}
-    </div>
+    <div class="content" v-html="post.description"></div>
     <footer>
       <div class="message">
         <div class="message-body">
-          {{ post.howToApply }}
+          <div v-html="post.howToApply"></div>
         </div>
       </div>
     </footer>

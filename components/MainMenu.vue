@@ -3,7 +3,7 @@
     <nav class="navbar">
       <div class="navbar-brand">
         <nuxt-link class="navbar-item" to="/">
-          <img src="https://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28">
+          <span class="title is-4 is-family-secondary">workremotelist.com</span>
         </nuxt-link>
         <div class="navbar-burger burger">
           <span></span>
@@ -17,7 +17,7 @@
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">
             <nuxt-link class="navbar-link" to="/">
-              Find a Job
+              <strong>Find a Job</strong>
             </nuxt-link>
             <div class="navbar-dropdown is-boxed">
               <nuxt-link v-for="(name, slug) in categories" :key="slug" class="navbar-item" :to="categoryUrl(slug)">
@@ -29,7 +29,7 @@
           <div class="navbar-item">
             <div class="field is-grouped">
               <p class="control">
-                <nuxt-link class="button" to="/new">
+                <nuxt-link class="button is-primary" to="/new">
                   <span class="icon">
                     <fa :icon="['fas', 'plus']" />
                   </span>
