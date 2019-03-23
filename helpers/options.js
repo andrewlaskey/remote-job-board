@@ -34,11 +34,11 @@ const options = {
   },
 
   getTimezoneName(slug) {
-    if (this.timezoneOptions.hasOwnProperty(slug)) {
-      return this.timezoneOptions[slug];
-    }
+    return this.timezoneOptions[slug] ? this.timezoneOptions[slug] : '';
+  },
 
-    return '';
+  getWorkTypeName(slug) {
+    return this.workTypeOptions[slug] ? this.workTypeOptions[slug] : '';
   },
 
   getCategoryUrl(slug) {

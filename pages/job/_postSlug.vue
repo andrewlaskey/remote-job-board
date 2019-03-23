@@ -1,6 +1,12 @@
 <template>
   <section class="section">
-    <post-detail :post="post" />
+    <div class="container">
+      <div class="columns">
+        <div class="column is-three-quarters">
+          <post-detail :post="post" />
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 

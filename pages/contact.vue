@@ -34,6 +34,7 @@
                     <option>Remove my listing</option>
                     <option>Report a listing</option>
                     <option>Payments</option>
+                    <option>Feature Request</option>
                     <option>General question or comment</option>
                   </select>
                 </div>

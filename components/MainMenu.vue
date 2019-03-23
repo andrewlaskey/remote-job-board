@@ -72,3 +72,10 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.navbar {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+</style>

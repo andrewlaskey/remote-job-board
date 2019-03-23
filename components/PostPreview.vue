@@ -1,12 +1,17 @@
 <template>
   <div class="job-preview">
     <div class="columns">
+      <div class="column is-1">
+        <figure v-if="post.companyLogo && post.companyLogo.length > 0" class="image is-64x64">
+          <img :src="post.companyLogo" alt="Logo">
+        </figure>
+      </div>
       <div class="column is-one-third">
         <nuxt-link :to="postUrl">
-          <h4 class="title is-4">
+          <h4 class="title is-5">
             {{ post.title }}
           </h4>
-          <h5 class="subtitle is-5">
+          <h5 class="subtitle is-6">
             {{ post.companyName }}
           </h5>
         </nuxt-link>
@@ -41,6 +46,7 @@ export default {
         return {
           title: '',
           companyName: '',
+          companyLogo: '',
           createDate: 0,
           slug: '',
           category: '',
@@ -88,20 +94,32 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+@import './../assets/variables';
+
 .job-preview {
   margin-top: 0;
   margin-bottom: 0;
   text-align: right;
-  border-top: 1px solid #dbdbdb;
 }
 
-.job-preview .column:first-child {
+.job-preview .column:nth-child(n + 2) {
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.job-preview .column:nth-child(2) {
   text-align: left;
 }
 
 .job-preview a {
   display: block;
+
+  .title {
+    &:hover,
+    &:focus {
+      color: $primary;
+    }
+  }
 }
 
 .job-preview .columns {

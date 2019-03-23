@@ -1,0 +1,25 @@
+// Set your brand colors
+$purple: #8A4D76;
+$pink: #FA7C91;
+$brown: #757763;
+$beige-light: #D0D1CD;
+$beige-lighter: #EFF0EB;
+$white: #ffffff;
+$blue: #5b6ff5;
+
+// Update Bulma's global variables
+$grey-dark: #353535;
+$grey-light: $beige-light;
+$primary: $blue;
+$link: $blue;
+$widescreen-enabled: false;
+$fullhd-enabled: false;
+$family-primary: 'Source Sans Pro', serif;
+$family-secondary: 'Lora', serif;
+
+// Update some of Bulma's component variables
+$body-background-color: $white;
+$control-border-width: 2px;
+$input-shadow: none;
+
+$footer-background-color: #f9f9f9;
