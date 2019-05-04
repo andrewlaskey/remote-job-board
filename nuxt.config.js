@@ -31,7 +31,12 @@ module.exports = {
   /*
   ** Global CSS
   */
-  css: ['@/assets/main.scss'],
+  css: [
+    '@/assets/main.scss',
+    'quill/dist/quill.snow.css',
+    'quill/dist/quill.bubble.css',
+    'quill/dist/quill.core.css'
+  ],
 
   /*
   ** Plugins to load before mounting the App
@@ -40,7 +45,8 @@ module.exports = {
     {
       src: '~/plugins/vue-stripe',
       ssr: false
-    }
+    },
+    { src: '~plugins/nuxt-quill-plugin.js', ssr: false }
   ],
 
   /*

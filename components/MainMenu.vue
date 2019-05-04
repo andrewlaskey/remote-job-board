@@ -5,14 +5,21 @@
         <nuxt-link class="navbar-item" to="/">
           <span class="title is-4 is-family-secondary">workremotelist.com</span>
         </nuxt-link>
-        <div class="navbar-burger burger">
+        <div 
+          class="navbar-burger burger"
+          :class="{ 'is-active': isActive }"
+          @click="toggleNavBar"
+        >
           <span></span>
           <span></span>
           <span></span>
         </div>
       </div>
 
-      <div class="navbar-menu">
+      <div 
+        class="navbar-menu"
+        :class="{ 'is-active': isActive }"
+      >
         <!-- Navbar End -->
         <div class="navbar-end">
           <div class="navbar-item has-dropdown is-hoverable">
@@ -57,7 +64,8 @@ export default {
 
   data() {
     return {
-      categories: {}
+      categories: {},
+      isActive: false
     };
   },
 
@@ -68,14 +76,29 @@ export default {
   },
 
   methods: {
-    categoryUrl: options.getCategoryUrl
+    categoryUrl: options.getCategoryUrl,
+    toggleNavBar() {
+      this.isActive = !this.isActive;
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+@import './../assets/variables';
+
 .navbar {
   padding-left: 1em;
   padding-right: 1em;
+}
+
+.navbar-menu .has-dropdown > a {
+  @media screen and (max-width: 1024px) {
+    display: none;
+  }
+}
+
+.navbar-burger:hover {
+  background-color: transparent;
 }
 </style>

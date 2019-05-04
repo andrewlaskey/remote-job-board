@@ -11,7 +11,7 @@
           {{ post.title }}
         </h1>
         <h2 class="subtitle is-6">
-          <a :href="post.companyUrl">
+          <a :href="post.companyUrl" target="_blank">
             {{ post.companyName }}
           </a>
         </h2>
@@ -31,7 +31,7 @@
         <div class="message-body">
           <div v-html="post.howToApply" class="content"></div>
           <p v-if="post.applyUrl && post.applyUrl.length > 0">
-            <a :href="post.applyUrl" class="button is-primary">
+            <a :href="post.applyUrl" class="button is-primary" target="_blank">
               Apply Now
             </a>
           </p>
@@ -97,6 +97,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.job-detail {
+  padding-bottom: 2em;
+}
+
 .job-detail-header {
   padding-bottom: 2em;
 }

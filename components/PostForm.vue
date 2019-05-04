@@ -4,6 +4,7 @@
       <h1 class="title is-3 is-family-secondary">
         Post a New Job
       </h1>
+      <h3 class="subtitle is-5">List your position for $100 for 30 days</h3>
       
       <div v-if="step == 'success'" class="notification is-success">
         <h3 class="title is-4">Thanks for listing with us!</h3>
@@ -12,7 +13,7 @@
       </div>
 
       <form v-show="step == 'form'">
-
+        <h5 class="title is-4">Step 1: Create Job Listing</h5>
         <div class="field">
           <label class="label">
             Job Title
@@ -27,10 +28,12 @@
             Job Description
           </label>
           <div class="control">
-            <vue-editor
-              v-model="description"
-              :editorToolbar="customToolbar"
-              placeholder="Describe the position and your ideal candidate"></vue-editor>
+            <div 
+              class="quill-editor" 
+              :content="description"
+              @change="onDescriptionEditorChange($event)"
+              v-quill:descriptionQuillEditor="editorOption"
+            ></div>
           </div>
         </div>
 
@@ -75,10 +78,12 @@
             How to Apply
           </label>
           <div class="control">
-            <vue-editor
-              v-model="howToApply"
-              :editorToolbar="customToolbar"
-              placeholder="How should potential hires apply for this position?"></vue-editor>
+            <div 
+              class="quill-editor" 
+              :content="howToApply"
+              @change="onHowToApplyEditorChange($event)"
+              v-quill:howToApplyQuillEditor="editorOption"
+            ></div>
           </div>
         </div>
 
@@ -87,7 +92,13 @@
             Email or Application URL (optional)
           </label>
           <div class="control">
-            <input v-model="applyUrl" class="input" type="text" placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere" required>
+            <input 
+              v-model="applyUrl" 
+              class="input" 
+              type="text" 
+              placeholder="ex: hr@yourcompany.com or https://yourcompany.com/applyhere" 
+              required
+            >
           </div>
         </div>
 
@@ -96,7 +107,13 @@
             Company Name
           </label>
           <div class="control">
-            <input v-model="companyName" class="input" type="text" placeholder="ex: Widget Co." required>
+            <input 
+              v-model="companyName" 
+              class="input" 
+              type="text" 
+              placeholder="ex: Widget Co." 
+              required
+            >
           </div>
         </div>
 
@@ -105,7 +122,13 @@
             Website
           </label>
           <div class="control">
-            <input v-model="companyUrl" class="input" type="text" placeholder="ex: https://widget.co" required>
+            <input 
+              v-model="companyUrl" 
+              class="input" 
+              type="text" 
+              placeholder="ex: https://widget.co" 
+              required
+            >
           </div>
         </div>
 
@@ -121,7 +144,13 @@
           </figure>
           <div class="file" v-show="!hasLogo">
             <label class="file-label">
-              <input id="logo-input" class="file-input" type="file" name="logo" v-on:change="onFileChange">
+              <input 
+                id="logo-input"
+                class="file-input"
+                type="file"
+                name="logo" 
+                v-on:change="onFileChange"
+              >
               <span class="file-cta">
                 <span class="file-icon">
                   <fa :icon="['fas', 'upload']" />
@@ -149,7 +178,11 @@
 
       <div v-show="step == 'preview'">
         <div class="container">
+          <h5 class="title is-4">Step 2: Preview</h5>
+          <p class="subtitle">This is how your listing will be displayed on the site.<br>Make sure everything looks correct.</p>
+          <hr>
           <post-detail :post="post"/>
+          <hr>
         </div>
         <div>
           <button class="button" v-on:click.prevent="showForm">
@@ -180,7 +213,6 @@
 </template>
 
 <script>
-import { VueEditor } from 'vue2-editor';
 import slugify from 'slugify';
 import axios from 'axios';
 import { log } from '~/helpers/logs.js';
@@ -192,8 +224,7 @@ export default {
   name: 'PostForm',
 
   components: {
-    PostDetail,
-    VueEditor
+    PostDetail
   },
 
   data() {
@@ -213,7 +244,20 @@ export default {
       companyLogo: '',
       status: 'unpaid',
       hasLogo: false,
-      post: {},
+      post: {
+        title: '',
+        companyUrl: '',
+        companyName: '',
+        companyLogo: '',
+        createDate: 0,
+        slug: '',
+        category: '',
+        type: '',
+        timezones: {},
+        description: '',
+        howToApply: '',
+        applyUrl: ''
+      },
       isFormValid: true,
       isError: false,
       isLoading: false,
@@ -224,18 +268,22 @@ export default {
       name: 'Remote Work List',
       stripeDescription: '60-day job listing',
       amount: 7500,
-      customToolbar: [
-        [{ header: 1 }, { header: 2 }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [
-          {
-            list: 'ordered'
-          },
-          {
-            list: 'bullet'
-          }
-        ]
-      ]
+      editorOption: {
+        modules: {
+          toolbar: [
+            [{ header: 1 }, { header: 2 }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [
+              {
+                list: 'ordered'
+              },
+              {
+                list: 'bullet'
+              }
+            ]
+          ]
+        }
+      }
     };
   },
 
@@ -300,6 +348,16 @@ export default {
       this.hasLogo = false;
       this.companyLogo = '';
       document.querySelector('#logo-input').value = '';
+    },
+
+    onHowToApplyEditorChange({ editor, html, text }) {
+      log('editor change!', editor, html, text);
+      this.howToApply = html;
+    },
+
+    onDescriptionEditorChange({ editor, html, text }) {
+      log('editor change!', editor, html, text);
+      this.description = html;
     },
 
     selectedTimezones(timezoneArray) {
@@ -469,6 +527,7 @@ export default {
     canceled() {
       // do stuff
       log('Canceled');
+      this.isLoading = false;
     }
   }
 };
@@ -498,5 +557,11 @@ export default {
   border-top: 0;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
+}
+
+.quill-editor {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>

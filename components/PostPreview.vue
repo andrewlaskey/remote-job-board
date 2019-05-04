@@ -27,6 +27,7 @@
         </nuxt-link>
       </div>
       <div class="column">
+        <span class="is-hidden-desktop">Posted </span>
         <span>{{ postDateFormatted }}</span>
       </div>
     </div>
@@ -100,11 +101,24 @@ export default {
 .job-preview {
   margin-top: 0;
   margin-bottom: 0;
-  text-align: right;
+
+  @media only screen and (max-width: 1023px) {
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #dbdbdb;
+  }
 }
 
 .job-preview .column:nth-child(n + 2) {
-  border-bottom: 1px solid #dbdbdb;
+  @media only screen and (max-width: 1023px) {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  @media only screen and (min-width: 1024px) {
+    border-bottom: 1px solid #dbdbdb;
+    text-align: right;
+  }
 }
 
 .job-preview .column:nth-child(2) {
