@@ -18,14 +18,20 @@ export default {
   components: {
     PostDetail
   },
-  async asyncData({ params }) {
-    try {
-      const post = await fb.getPostBySlug(params.postSlug);
-
+  async asyncData({ params, payload }) {
+    if (payload) {
       return {
-        post
+        post: payload
       };
-    } catch (error) {}
+    } else {
+      try {
+        const post = await fb.getPostBySlug(params.postSlug);
+
+        return {
+          post
+        };
+      } catch (error) {}
+    }
 
     return {};
   }

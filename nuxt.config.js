@@ -1,7 +1,8 @@
-const pkg = require('./package')
+import pkg from './package';
+import fb from './helpers/firebase.js';
+import options from './helpers/options.js';
 
-
-module.exports = {
+export default {
   mode: 'universal',
 
   /*
@@ -68,6 +69,37 @@ module.exports = {
     ]
   },
 
+  generate: {
+    routes: function() {
+      return fb.getPosts().then(posts => {
+        const postRoutes = posts.map(post => {
+          return {
+            route: `/job/${post.slug}`,
+            payload: post
+          };
+        });
+
+        const categories = Object.keys(options.categoryOptions).map(
+          category => {
+            return {
+              route: `/category/${category}`,
+              payload: null
+            };
+          }
+        );
+
+        const timezones = Object.keys(options.timezoneOptions).map(timezone => {
+          return {
+            route: `/timezone/${timezone}`,
+            payload: null
+          };
+        });
+
+        return [...postRoutes, ...categories, ...timezones];
+      });
+    }
+  },
+
   /*
   ** Build configuration
   */
@@ -94,4 +126,4 @@ module.exports = {
       }
     }
   }
-}
+};
