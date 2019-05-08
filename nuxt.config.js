@@ -146,7 +146,7 @@ export default {
 
         const statusRoutes = posts.map(post => {
           return {
-            route: `/status/${post.slug}`,
+            route: `/status/${post.id}`,
             payload: null
           };
         });
