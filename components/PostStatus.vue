@@ -10,28 +10,42 @@
         <div class="level-left">
           <div class="level-item">
             <div>
-              <p class="heading">Title</p>
-              <p class="title is-4">{{ post.title }}</p>
+              <p class="heading">
+                Title
+              </p>
+              <p class="title is-4">
+                {{ post.title }}
+              </p>
             </div>
           </div>
         </div>
         <div class="level-right">
           <div class="level-item">
             <div>
-              <p class="heading">Status</p>
-              <p class="title is-5">{{ post.status }}</p>
+              <p class="heading">
+                Status
+              </p>
+              <p class="title is-5">
+                {{ post.status }}
+              </p>
             </div>
           </div>
           <div class="level-item">
             <div>
-              <p class="heading">Created</p>
-              <p class="title is-5">{{ postDateFormatted }}</p>
+              <p class="heading">
+                Created
+              </p>
+              <p class="title is-5">
+                {{ postDateFormatted }}
+              </p>
             </div>
           </div>
         </div>
       </div>
       <div class="container">
-        <p>If you have any questions about the status of your listing, please <nuxt-link :to="'/contact'">contact support.</nuxt-link></p>
+        <p>
+          If you have any questions about the status of your listing, please <nuxt-link :to="'/contact'">contact support.</nuxt-link>
+        </p>
       </div>
     </div>
   </div>

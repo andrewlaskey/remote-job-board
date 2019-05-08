@@ -1,6 +1,8 @@
+import firebase from 'firebase';
 import pkg from './package';
-import fb from './helpers/firebase.js';
 import options from './helpers/options.js';
+
+require('dotenv').config();
 
 export default {
   mode: 'universal',
@@ -56,6 +58,7 @@ export default {
   modules: [
     // Doc:https://github.com/nuxt-community/modules/tree/master/packages/bulma
     '@nuxtjs/pwa',
+    '@nuxtjs/dotenv',
     'nuxt-fontawesome'
   ],
 
@@ -71,7 +74,59 @@ export default {
 
   generate: {
     routes: function() {
-      return fb.getPosts().then(posts => {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: process.env.FIREBASE_API_KEY,
+          authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+          databaseURL: process.env.FIREBASE_DATABASE_URL,
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID
+        });
+      }
+
+      const buildPostListFromQuery = querySnapshot => {
+        const posts = [];
+
+        querySnapshot.forEach(doc => {
+          const post = doc.data();
+
+          post.id = doc.id;
+
+          posts.push(post);
+        });
+
+        return posts;
+      };
+
+      const getCollection = (published = true) => {
+        const db = firebase.firestore();
+        const collection = db.collection('jobs');
+
+        if (published) {
+          return collection.where('status', '==', 'published');
+        }
+
+        return collection;
+      };
+
+      const getPosts = async (published = true) => {
+        try {
+          const collection = getCollection(published);
+          const posts = await collection
+            .orderBy('createDate', 'desc')
+            .get()
+            .then(buildPostListFromQuery);
+
+          return posts;
+        } catch (error) {
+          // console.log(error);
+        }
+
+        return undefined;
+      };
+
+      return getPosts().then(posts => {
         const postRoutes = posts.map(post => {
           return {
             route: `/job/${post.slug}`,

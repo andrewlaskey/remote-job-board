@@ -45,7 +45,7 @@
             </label>
             <div class="field">
               <div class="control">
-                <textarea id="comment" class="textarea" name="comment"></textarea>
+                <textarea id="comment" class="textarea" name="comment" />
               </div>
             </div>
             <div class="field">

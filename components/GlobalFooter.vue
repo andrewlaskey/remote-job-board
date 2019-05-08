@@ -4,13 +4,19 @@
       <div class="column is-6">
         <div class="level">
           <div class="level-item">
-            <nuxt-link to="/">Home</nuxt-link>
+            <nuxt-link to="/">
+              Home
+            </nuxt-link>
           </div>
           <div class="level-item">
-            <nuxt-link to="/about">About</nuxt-link>
+            <nuxt-link to="/about">
+              About
+            </nuxt-link>
           </div>
           <div class="level-item">
-            <nuxt-link to="/contact">Contact</nuxt-link>
+            <nuxt-link to="/contact">
+              Contact
+            </nuxt-link>
           </div>
           <div class="level-item">
             <nuxt-link to="/new">

@@ -16,7 +16,7 @@
           </a>
         </h2>
         <div class="tags">
-          <span v-for="tag in tags" :key="tag" class="tag is-primary">
+          <span v-for="(tag, index) in tags" :key="index" class="tag is-primary">
             {{ tag }}
           </span>
         </div>
@@ -25,11 +25,11 @@
         </p>
       </div>
     </header>
-    <div class="content" v-html="post.description"></div>
+    <div class="content" v-html="post.description" />
     <footer>
       <div class="message">
         <div class="message-body">
-          <div v-html="post.howToApply" class="content"></div>
+          <div class="content" v-html="post.howToApply" />
           <p v-if="post.applyUrl && post.applyUrl.length > 0">
             <a :href="post.applyUrl" class="button is-primary" target="_blank">
               Apply Now
@@ -47,7 +47,6 @@ import options from './../helpers/options.js';
 
 export default {
   name: 'PostDetail',
-
   props: {
     post: {
       type: Object,
@@ -70,7 +69,9 @@ export default {
     },
     edit: Boolean
   },
-
+  data() {
+    return {};
+  },
   computed: {
     createDateFormatted() {
       if (this.post && this.post.createDate) {
@@ -88,10 +89,6 @@ export default {
 
       return [category, type, ...timezones];
     }
-  },
-
-  data() {
-    return {};
   }
 };
 </script>

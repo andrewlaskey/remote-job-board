@@ -4,16 +4,26 @@
       <h1 class="title is-3 is-family-secondary">
         Post a New Job
       </h1>
-      <h3 class="subtitle is-5">List your position for $100 for 30 days</h3>
+      <h3 class="subtitle is-5">
+        List your position for $100 for 30 days
+      </h3>
       
       <div v-if="step == 'success'" class="notification is-success">
-        <h3 class="title is-4">Thanks for listing with us!</h3>
-        <p>Your new job listing was submitted and pending approval.</p>
-        <p>View your listing's status <nuxt-link v-bind:to="`status/${submitSuccess}`">here.</nuxt-link></p>
+        <h3 class="title is-4">
+          Thanks for listing with us!
+        </h3>
+        <p>
+          Your new job listing was submitted and pending approval.
+        </p>
+        <p>
+          View your listing's status <nuxt-link v-bind:to="`status/${submitSuccess}`">here.</nuxt-link>
+        </p>
       </div>
 
       <form v-show="step == 'form'">
-        <h5 class="title is-4">Step 1: Create Job Listing</h5>
+        <h5 class="title is-4">
+          Step 1: Create Job Listing
+        </h5>
         <div class="field">
           <label class="label">
             Job Title
@@ -29,11 +39,11 @@
           </label>
           <div class="control">
             <div 
-              class="quill-editor" 
+              class="quill-editor"
+              v-quill:descriptionQuillEditor="editorOption"
               :content="description"
               @change="onDescriptionEditorChange($event)"
-              v-quill:descriptionQuillEditor="editorOption"
-            ></div>
+            />
           </div>
         </div>
 
@@ -79,11 +89,11 @@
           </label>
           <div class="control">
             <div 
-              class="quill-editor" 
+              class="quill-editor"
+              v-quill:howToApplyQuillEditor="editorOption"
               :content="howToApply"
               @change="onHowToApplyEditorChange($event)"
-              v-quill:howToApplyQuillEditor="editorOption"
-            ></div>
+            />
           </div>
         </div>
 
@@ -133,16 +143,18 @@
         </div>
 
         <div class="field">
-          <label class="label">Company Logo (optional)</label>
-          <figure class="image is-128x128" v-show="hasLogo">
-            <img :src="companyLogo" alt="Your company's logo" />
+          <label class="label">
+            Company Logo (optional)
+          </label>
+          <figure v-show="hasLogo" class="image is-128x128">
+            <img :src="companyLogo" alt="Your company's logo">
             <button class="button image-reset" v-on:click.prevent="removeLogo">
               <span class="icon is-small">
                 <fa :icon="['fas', 'times-circle']" />
               </span>
             </button>
           </figure>
-          <div class="file" v-show="!hasLogo">
+          <div v-show="!hasLogo" class="file">
             <label class="file-label">
               <input 
                 id="logo-input"
@@ -172,16 +184,22 @@
         </div>
 
         <div v-show="!isFormValid" class="notification is-warning">
-          <p>Please make sure all fields are filled out.</p>
+          <p>
+            Please make sure all fields are filled out.
+          </p>
         </div>
       </form>
 
       <div v-show="step == 'preview'">
         <div class="container">
-          <h5 class="title is-4">Step 2: Preview</h5>
-          <p class="subtitle">This is how your listing will be displayed on the site.<br>Make sure everything looks correct.</p>
+          <h5 class="title is-4">
+            Step 2: Preview
+          </h5>
+          <p class="subtitle">
+            This is how your listing will be displayed on the site.<br>Make sure everything looks correct.
+          </p>
           <hr>
-          <post-detail :post="post"/>
+          <post-detail :post="post" />
           <hr>
         </div>
         <div>
@@ -208,7 +226,7 @@
       @opened="opened"
       @closed="closed"
       @canceled="canceled"
-    ></vue-stripe-checkout>
+    />
   </div>
 </template>
 

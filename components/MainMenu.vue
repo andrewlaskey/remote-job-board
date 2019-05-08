@@ -3,16 +3,18 @@
     <nav class="navbar">
       <div class="navbar-brand">
         <nuxt-link class="navbar-item" to="/">
-          <span class="title is-4 is-family-secondary">workremotelist.com</span>
+          <span class="title is-4 is-family-secondary">
+            workremotelist.com
+          </span>
         </nuxt-link>
         <div 
           class="navbar-burger burger"
           :class="{ 'is-active': isActive }"
           @click="toggleNavBar"
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span />
+          <span />
+          <span />
         </div>
       </div>
 

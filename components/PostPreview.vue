@@ -27,8 +27,12 @@
         </nuxt-link>
       </div>
       <div class="column">
-        <span class="is-hidden-desktop">Posted </span>
-        <span>{{ postDateFormatted }}</span>
+        <span class="is-hidden-desktop">
+          Posted 
+        </span>
+        <span>
+          {{ postDateFormatted }}
+        </span>
       </div>
     </div>
   </div>
