@@ -144,6 +144,13 @@ export default {
           };
         });
 
+        const statusRoutes = posts.map(post => {
+          return {
+            route: `/status/${post.slug}`,
+            payload: null
+          };
+        });
+
         const categories = Object.keys(options.categoryOptions).map(
           category => {
             return {
@@ -160,7 +167,7 @@ export default {
           };
         });
 
-        return [...postRoutes, ...categories, ...timezones];
+        return [...postRoutes, ...categories, ...timezones, ...statusRoutes];
       });
     }
   },
