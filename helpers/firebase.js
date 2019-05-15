@@ -107,7 +107,7 @@ const fb = {
             };
           }
 
-          return {};
+          return undefined;
         });
 
       return post;
@@ -115,7 +115,7 @@ const fb = {
       logError(error);
     }
 
-    return {};
+    return undefined;
   },
 
   async getPostBySlug(slug) {

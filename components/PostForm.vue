@@ -202,13 +202,25 @@
           <post-detail :post="post" />
           <hr>
         </div>
-        <div>
+        <div class="form-actions">
           <button class="button" v-on:click.prevent="showForm">
             Go Back
           </button>
-          <button class="button is-primary" v-bind:class="{ 'is-loading' : isLoading }" v-on:click.prevent="checkout">
-            Pay and Post Job
+          <button 
+            class="button is-primary"
+            v-bind:class="{ 'is-loading' : isLoading }"
+            v-on:click.prevent="initCheckout"
+          >
+            Pay and Submit Job
           </button>
+          <p>
+            <small>
+              After completing purchase, your new post will be submitted for review and approval.<br>If you have any questions, please contact us 
+              <nuxt-link :to="'/contact'">
+                here.
+              </nuxt-link>
+            </small>
+          </p>
         </div>
         <div v-show="isError" class="notification is-danger">
           {{ errorMsg }}
@@ -421,6 +433,7 @@ export default {
             }
           } else {
             result.success = true;
+            result.id = data.postId;
           }
 
           return result;
@@ -497,15 +510,16 @@ export default {
       }
     },
 
-    async checkout() {
+    initCheckout() {
       // Reset errors
       this.isError = false;
       this.isLoading = true;
 
-      try {
-        // Do Stripe stuff
-        const { token } = await this.$refs.checkoutRef.open();
+      this.$refs.checkoutRef.open();
+    },
 
+    async completeCheckout(token) {
+      try {
         // Upload logo if there is one
         const uploadSuccess = await this.uploadLogo();
 
@@ -516,23 +530,27 @@ export default {
         }
 
         // Charge card and create post
-        const addedPost = await this.createNewPost(token.id, token.email);
+        const result = await this.createNewPost(token.id, token.email);
 
-        this.isLoading = false;
-
-        if (addedPost) {
-          this.step = 'success';
+        if (result.success) {
+          this.$router.push({
+            path: `/thank-you?id=${result.id}`
+          });
+        } else {
+          throw new Error(result.message);
         }
       } catch (err) {
         this.onError(err.message);
       }
     },
+
     done({ token, args }) {
       // token - is the token object
       // args - is an object containing the billing and shipping address if enabled
       // do stuff...
       log('Done');
       log(token);
+      this.completeCheckout(token);
     },
     opened() {
       // do stuff
@@ -581,5 +599,9 @@ export default {
   min-height: 200px;
   max-height: 400px;
   overflow-y: auto;
+}
+
+.form-actions .button {
+  margin-bottom: 1em;
 }
 </style>

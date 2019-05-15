@@ -1,11 +1,6 @@
 <template>
   <div class="job-status">
-    <header class="section">
-      <h1 class="title is-1">
-        Job Listing Status
-      </h1>
-    </header>
-    <div class="section">
+    <div class="container">
       <div class="level">
         <div class="level-left">
           <div class="level-item">
@@ -14,7 +9,15 @@
                 Title
               </p>
               <p class="title is-4">
-                {{ post.title }}
+                <nuxt-link 
+                  v-if="post.status === 'published'"
+                  :to="`/job/${post.slug}`"
+                >
+                  {{ post.title }}
+                </nuxt-link>
+                <span v-else>
+                  {{ post.title }}
+                </span>
               </p>
             </div>
           </div>
@@ -42,11 +45,20 @@
           </div>
         </div>
       </div>
-      <div class="container">
-        <p>
-          If you have any questions about the status of your listing, please <nuxt-link :to="'/contact'">contact support.</nuxt-link>
-        </p>
-      </div>
+    </div>
+    <div class="container">
+      <p v-if="post.status === 'published'">
+        View your lising 
+        <nuxt-link :to="`/job/${post.slug}`">
+          here.
+        </nuxt-link>
+      </p>
+      <p>
+        If you have any questions about the status of your listing, please 
+        <nuxt-link :to="'/contact'">
+          contact support.
+        </nuxt-link>
+      </p>
     </div>
   </div>
 </template>

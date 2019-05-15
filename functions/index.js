@@ -1,5 +1,7 @@
 const functions = require('firebase-functions');
 const cors = require('cors')({ origin: true });
+const axios = require('axios');
+const mailgun = require('mailgun-js');
 const stripe = require('stripe')(functions.config().stripe.token);
 const currency = 'usd';
 const amount = 7500;
@@ -19,7 +21,8 @@ const createJobPost = async (post, stripeCharge, userEmail) => {
       .set({
         title: post.title,
         status: post.status,
-        createDate: post.createDate
+        createDate: post.createDate,
+        slug: post.slug
       });
 
     // Save private post data
@@ -40,21 +43,85 @@ const createJobPost = async (post, stripeCharge, userEmail) => {
   }
 };
 
+const mailGunResponse = (error, body) => {
+  console.log(error, body);
+};
+
+const sendUserNotification = (email, post, postId) => {
+  const apiKey = functions.config().mailgun.key;
+  const domain = functions.config().mailgun.domain;
+  const from = functions.config().mailgun.from;
+  const mg = mailgun({
+    apiKey,
+    domain
+  });
+
+  mg.messages().send(
+    {
+      from,
+      to: email,
+      subject: 'Your job listing was received and is being reviewed',
+      text: `
+        Thank you for submitting your listing for ${post.title}!
+
+        We are currently reviewing your post and will notify you when it is approved.
+
+        You can view the status of your post here:
+        https://remote-job-board.netlify.com/status?id=${postId}
+      `
+    },
+    mailGunResponse
+  );
+};
+
+const sendAdminNotification = (email, post, postId) => {
+  const apiKey = functions.config().mailgun.key;
+  const domain = functions.config().mailgun.domain;
+  const from = functions.config().mailgun.from;
+  const adminEmail = functions.config().mailgun.adminto;
+  const mg = mailgun({
+    apiKey,
+    domain
+  });
+
+  mg.messages().send(
+    {
+      from,
+      to: adminEmail,
+      subject: 'New post submission',
+      text: `
+        Title: ${post.title}
+        User: ${email}
+        Post ID: ${postId}
+        Console: https://console.firebase.google.com/project/remote-job-board/
+      `
+    },
+    mailGunResponse
+  );
+};
+
+const netlifyBuildHook = () => {
+  const webhookUrl =
+    'https://api.netlify.com/build_hooks/5cd5c6d47d9014f060cddc2c';
+
+  axios.post(webhookUrl, {});
+};
+
 /*eslint-disable */
 exports.processNewPost = functions.https.onRequest((req, res) => {
   return cors(req, res, () => {
-    const token = req.body.token,
-      post = req.body.post,
-      userEmail = req.body.email,
-      idempotencyKey = post.slug + post.createDate,
-      resPackage = {
-        error: false,
-        errorType: '',
-        chargeSuccess: false,
-        postCreate: false,
-        postId: false,
-        message: ''
-      };
+    const token = req.body.token;
+    const post = req.body.post;
+    const userEmail = req.body.email;
+    const idempotencyKey = post.slug + post.createDate;
+    const resPackage = {
+      error: false,
+      errorType: '',
+      chargeSuccess: false,
+      postCreate: false,
+      postId: false,
+      message: ''
+    };
 
     return stripe.charges
       .create(
@@ -80,6 +147,10 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
               if (postId) {
                 resPackage.postId = postId;
                 resPackage.message = 'success';
+
+                netlifyBuildHook();
+                sendAdminNotification(userEmail, post, postId);
+                sendUserNotification(userEmail, post, postId);
               } else {
                 resPackage.errorType = 'post';
               }
