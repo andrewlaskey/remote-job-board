@@ -17,16 +17,15 @@
 
 <script>
 import options from '~/helpers/options.js';
-import fb from '~/helpers/firebase.js';
 import PostsList from '~/components/PostsList.vue';
 
 export default {
   components: {
     PostsList
   },
-  async asyncData({ params }) {
+  async asyncData({ app, params }) {
     try {
-      const posts = await fb.getPostsByCategory(params.category);
+      const posts = await app.$fb.getPostsByCategory(params.category);
 
       return {
         posts

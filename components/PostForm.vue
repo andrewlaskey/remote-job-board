@@ -244,10 +244,8 @@
 
 <script>
 import slugify from 'slugify';
-import axios from 'axios';
 import { log } from '~/helpers/logs.js';
 import options from './../helpers/options.js';
-import fb from './../helpers/firebase.js';
 import PostDetail from './PostDetail.vue';
 
 export default {
@@ -405,7 +403,7 @@ export default {
         message: ''
       };
 
-      return axios
+      return this.$axios
         .post(api, {
           token: tokenId,
           email,
@@ -499,7 +497,7 @@ export default {
         let logoSaveUrlPath = '';
 
         if (uploadFile) {
-          logoSaveUrlPath = await fb.uploadFile(uploadFile);
+          logoSaveUrlPath = await this.$fb.uploadFile(uploadFile);
         }
 
         this.post.companyLogo = logoSaveUrlPath;
@@ -534,7 +532,7 @@ export default {
 
         if (result.success) {
           this.$router.push({
-            path: `/thank-you?id=${result.id}`
+            path: `/thank-you/${result.id}`
           });
         } else {
           throw new Error(result.message);

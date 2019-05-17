@@ -1,19 +1,22 @@
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import 'firebase/firestore';
-import { logError, log } from './logs';
+import 'firebase/storage';
+import { logError } from './logs';
 
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID
-  });
-}
+const initFirebase = () => {
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID
+    });
+  }
+};
 
-function buildPostListFromQuery(querySnapshot) {
+const getPostFromQuery = querySnapshot => {
   const posts = [];
 
   querySnapshot.forEach(doc => {
@@ -25,9 +28,11 @@ function buildPostListFromQuery(querySnapshot) {
   });
 
   return posts;
-}
+};
 
-function getCollection(published = true) {
+const getCollection = (published = true) => {
+  initFirebase();
+
   const db = firebase.firestore();
   const collection = db.collection('jobs');
 
@@ -36,7 +41,7 @@ function getCollection(published = true) {
   }
 
   return collection;
-}
+};
 
 const fb = {
   async getPosts(published = true) {
@@ -45,7 +50,7 @@ const fb = {
       const posts = await collection
         .orderBy('createDate', 'desc')
         .get()
-        .then(buildPostListFromQuery);
+        .then(getPostFromQuery);
 
       return posts;
     } catch (error) {
@@ -62,7 +67,7 @@ const fb = {
         .where('category', '==', category)
         .orderBy('createDate', 'desc')
         .get()
-        .then(buildPostListFromQuery);
+        .then(getPostFromQuery);
 
       return posts;
     } catch (error) {
@@ -81,7 +86,7 @@ const fb = {
         .where(timezoneQuery, '>', 0)
         .orderBy(timezoneQuery, 'desc')
         .get()
-        .then(buildPostListFromQuery);
+        .then(getPostFromQuery);
 
       return posts;
     } catch (error) {
@@ -92,6 +97,7 @@ const fb = {
   },
 
   async getPostStatus(id) {
+    initFirebase();
     const db = firebase.firestore();
 
     try {
@@ -120,7 +126,6 @@ const fb = {
 
   async getPostBySlug(slug) {
     try {
-      log(slug);
       const collection = getCollection(true);
       const post = await collection
         .where('slug', '==', slug)
@@ -145,37 +150,8 @@ const fb = {
     return {};
   },
 
-  // Create
-
-  async createPost(post) {
-    const db = firebase.firestore();
-
-    try {
-      const newPost = await db.collection('jobs').add(post);
-
-      // Set the status in a separate, readable collection
-      const postStatus = {
-        title: post.title,
-        status: post.publishStatus,
-        createDate: post.createDate
-      };
-
-      await db
-        .collection('status')
-        .doc(newPost.id)
-        .set(postStatus);
-
-      log('New job created at ' + newPost.id);
-
-      return newPost.id;
-    } catch (error) {
-      logError(error);
-    }
-
-    return undefined;
-  },
-
   async uploadFile(logoFile) {
+    initFirebase();
     const storageRef = firebase.storage().ref();
 
     try {
@@ -190,23 +166,6 @@ const fb = {
     }
 
     return '';
-  },
-
-  async addPrivateData(email, token, postRef) {
-    const db = firebase.firestore();
-
-    try {
-      const privateData = await db.collection(`jobs/${postRef}/private`).add({
-        email,
-        token
-      });
-
-      return privateData.id;
-    } catch (error) {
-      logError(error);
-    }
-
-    return false;
   }
 };
 

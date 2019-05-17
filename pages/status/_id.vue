@@ -11,7 +11,7 @@
       v-if="post"
       :post="post" 
     />
-    <div class="container" v-else>
+    <div v-else class="container">
       <p>
         That is not a valid post id.
       </p>
@@ -20,16 +20,15 @@
 </template>
 
 <script>
-import fb from '~/helpers/firebase.js';
 import PostStatus from '~/components/PostStatus.vue';
 
 export default {
   components: {
     PostStatus
   },
-  async asyncData({ query }) {
+  async asyncData({ app, params }) {
     try {
-      const post = await fb.getPostStatus(query.id);
+      const post = await app.$fb.getPostStatus(params.id);
 
       return {
         post

@@ -49,7 +49,10 @@ export default {
       src: '~/plugins/vue-stripe',
       ssr: false
     },
-    { src: '~plugins/nuxt-quill-plugin.js', ssr: false }
+    { src: '~/plugins/nuxt-quill-plugin.js', ssr: false },
+    {
+      src: '~/plugins/firebase'
+    }
   ],
 
   /*
@@ -59,6 +62,7 @@ export default {
     // Doc:https://github.com/nuxt-community/modules/tree/master/packages/bulma
     '@nuxtjs/pwa',
     '@nuxtjs/dotenv',
+    '@nuxtjs/axios',
     'nuxt-fontawesome'
   ],
 
@@ -144,13 +148,6 @@ export default {
           };
         });
 
-        const statusRoutes = posts.map(post => {
-          return {
-            route: `/status/${post.id}`,
-            payload: null
-          };
-        });
-
         const categories = Object.keys(options.categoryOptions).map(
           category => {
             return {
@@ -167,7 +164,7 @@ export default {
           };
         });
 
-        return [...postRoutes, ...categories, ...timezones, ...statusRoutes];
+        return [...postRoutes, ...categories, ...timezones];
       });
     }
   },

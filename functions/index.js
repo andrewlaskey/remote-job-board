@@ -2,12 +2,36 @@ const functions = require('firebase-functions');
 const cors = require('cors')({ origin: true });
 const axios = require('axios');
 const mailgun = require('mailgun-js');
+const sanitizeHtml = require('sanitize-html');
+const stripHtml = require('string-strip-html');
 const stripe = require('stripe')(functions.config().stripe.token);
 const currency = 'usd';
 const amount = 7500;
 
 const admin = require('firebase-admin');
 admin.initializeApp();
+
+const sanitizePost = post => {
+  const {
+    companyName,
+    companyUrl,
+    description,
+    howToApply,
+    title,
+    applyUrl,
+    ...rest
+  } = post;
+
+  return {
+    applyUrl: stripHtml(applyUrl),
+    companyName: stripHtml(companyName),
+    companyUrl: stripHtml(companyUrl),
+    description: sanitizeHtml(description),
+    howToApply: sanitizeHtml(howToApply),
+    title: stripHtml(title),
+    ...rest
+  };
+};
 
 const createJobPost = async (post, stripeCharge, userEmail) => {
   try {
@@ -67,7 +91,7 @@ const sendUserNotification = (email, post, postId) => {
         We are currently reviewing your post and will notify you when it is approved.
 
         You can view the status of your post here:
-        https://remote-job-board.netlify.com/status?id=${postId}
+        https://remote-job-board.netlify.com/status/${postId}
       `
     },
     mailGunResponse
@@ -94,6 +118,12 @@ const sendAdminNotification = (email, post, postId) => {
         User: ${email}
         Post ID: ${postId}
         Console: https://console.firebase.google.com/project/remote-job-board/
+        Approve: url
+        Description: ${stripHtml(post.description)}
+        How To Apply: ${stripHtml(post.howToApply)}
+        Apply Url: ${post.applyUrl}
+        Company Name: ${post.companyName}
+        Company Url: ${post.companyUrl}
       `
     },
     mailGunResponse
@@ -140,8 +170,10 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
           console.log(charge);
           resPackage.chargeSuccess = true;
           resPackage.message = 'charge successful';
+
+          const safePost = sanitizePost(post);
           
-          return createJobPost(post, charge, userEmail)
+          return createJobPost(safePost, charge, userEmail)
             .then(postId => {
 
               if (postId) {

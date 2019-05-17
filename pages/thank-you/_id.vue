@@ -1,6 +1,9 @@
 <template>
   <section>
-    <div class="section">
+    <div 
+      v-if="post"
+      class="section"
+    >
       <div class="container">
         <header>
           <h1 class="title is-1 has-text-centered">
@@ -9,7 +12,15 @@
         </header>
         <div class="columns is-centered">
           <div class="column is-half content">
-            <p>We have received your new post submission and it is currently awaiting approval. You should receive an email confirmation shortly.</p>
+            <p>
+              We have received your new post submission and it is currently awaiting approval. You should receive an email confirmation shortly.
+            </p>
+            <p>
+              You may view the status of your job listing at any time 
+              <nuxt-link :to="`/status/${post.id}`">
+                here
+              </nuxt-link>
+            </p>
           </div>
         </div>
       </div>
@@ -29,16 +40,15 @@
 </template>
 
 <script>
-import fb from '~/helpers/firebase.js';
 import PostStatus from '~/components/PostStatus.vue';
 
 export default {
   components: {
     PostStatus
   },
-  async asyncData({ query }) {
+  async asyncData({ app, params }) {
     try {
-      const post = await fb.getPostStatus(query.id);
+      const post = await app.$fb.getPostStatus(params.id);
 
       return {
         post

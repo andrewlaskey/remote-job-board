@@ -11,21 +11,20 @@
 </template>
 
 <script>
-import fb from '~/helpers/firebase.js';
 import PostDetail from '~/components/PostDetail.vue';
 
 export default {
   components: {
     PostDetail
   },
-  async asyncData({ params, payload }) {
+  async asyncData({ app, params, payload }) {
     if (payload) {
       return {
         post: payload
       };
     } else {
       try {
-        const post = await fb.getPostBySlug(params.postSlug);
+        const post = await app.$fb.getPostBySlug(params.postSlug);
 
         return {
           post

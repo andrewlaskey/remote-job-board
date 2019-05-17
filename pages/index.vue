@@ -29,16 +29,15 @@
 </template>
 
 <script>
-import fb from '~/helpers/firebase.js';
 import PostsList from '~/components/PostsList.vue';
 
 export default {
   components: {
     PostsList
   },
-  async asyncData(context) {
+  async asyncData({ app }) {
     try {
-      const posts = await fb.getPosts();
+      const posts = await app.$fb.getPosts();
 
       return {
         posts
