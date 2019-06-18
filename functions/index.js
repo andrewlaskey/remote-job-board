@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const functions = require('firebase-functions');
 const cors = require('cors')({ origin: true });
 const axios = require('axios');
@@ -71,7 +72,7 @@ const mailGunResponse = (error, body) => {
   console.log(error, body);
 };
 
-const sendUserNotification = (email, post, postId) => {
+const sendEmail = (to, subject, text) => {
   const apiKey = functions.config().mailgun.key;
   const domain = functions.config().mailgun.domain;
   const from = functions.config().mailgun.from;
@@ -83,56 +84,73 @@ const sendUserNotification = (email, post, postId) => {
   mg.messages().send(
     {
       from,
-      to: email,
-      subject: 'Your job listing was received and is being reviewed',
-      text: `
-        Thank you for submitting your listing for ${post.title}!
-
-        We are currently reviewing your post and will notify you when it is approved.
-
-        You can view the status of your post here:
-        https://remote-job-board.netlify.com/status/${postId}
-      `
+      to,
+      subject,
+      text
     },
     mailGunResponse
   );
 };
 
-const sendAdminNotification = (email, post, postId) => {
-  const apiKey = functions.config().mailgun.key;
-  const domain = functions.config().mailgun.domain;
-  const from = functions.config().mailgun.from;
-  const adminEmail = functions.config().mailgun.adminto;
-  const mg = mailgun({
-    apiKey,
-    domain
-  });
+const sendUserNotification = (email, post, postId) => {
+  const subject = 'Your job listing was received and is being reviewed';
+  const text = `
+    Thank you for submitting your listing for ${post.title}!
 
-  mg.messages().send(
-    {
-      from,
-      to: adminEmail,
-      subject: 'New post submission',
-      text: `
-        Title: ${post.title}
-        User: ${email}
-        Post ID: ${postId}
-        Console: https://console.firebase.google.com/project/remote-job-board/
-        Approve: url
-        Description: ${stripHtml(post.description)}
-        How To Apply: ${stripHtml(post.howToApply)}
-        Apply Url: ${post.applyUrl}
-        Company Name: ${post.companyName}
-        Company Url: ${post.companyUrl}
-      `
-    },
-    mailGunResponse
-  );
+    We are currently reviewing your post and will notify you when it is approved.
+
+    You can view the status of your post here:
+    https://remote-job-board.netlify.com/status/${postId}
+  `;
+
+  sendEmail(email, subject, text);
+};
+
+const sendUserApproveNotification = (email, post) => {
+  const subject = 'Your job listing was approved';
+  const text = `
+    Your job listing for ${post.title} was approved!
+
+    You may view your listing here:
+    https://remote-job-board.netlify.com/job/${post.slug}
+  `;
+
+  sendEmail(email, subject, text);
+};
+
+const sendAdminNotification = (email, post, postId) => {
+  const adminEmail = functions.config().mailgun.adminto;
+
+  const hmac = crypto.createHash('sha256', functions.config().rjb.key);
+  const signature = hmac.update(postId).digest('hex');
+
+  const subject = 'New post submission';
+  const text = `
+    Title: ${post.title}
+    User: ${email}
+    Post ID: ${postId}
+    Console: https://console.firebase.google.com/project/remote-job-board/
+    Approve: https://us-central1-remote-job-board.cloudfunctions.net/approvePost?sig=${signature}&id=${postId}
+    Description: ${stripHtml(post.description)}
+    How To Apply: ${stripHtml(post.howToApply)}
+    Apply Url: ${post.applyUrl}
+    Company Name: ${post.companyName}
+    Company Url: ${post.companyUrl}
+  `;
+
+  sendEmail(adminEmail, subject, text);
 };
 
 const netlifyBuildHook = () => {
   const webhookUrl =
     'https://api.netlify.com/build_hooks/5cd5c6d47d9014f060cddc2c';
+
+  axios.post(webhookUrl, {});
+};
+
+const netlifyApprovedBuildHook = () => {
+  const webhookUrl =
+    'https://api.netlify.com/build_hooks/5d08676e5d59683481631eeb';
 
   axios.post(webhookUrl, {});
 };
@@ -231,3 +249,65 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
   });
 });
 /*eslint-enable */
+
+exports.approvePost = functions.https.onRequest((req, res) => {
+  return cors(req, res, () => {
+    const { sig, id } = req.query;
+
+    const hmac = crypto.createHash('sha256', functions.config().rjb.key);
+    const computedSignature = hmac.update(id).digest('hex');
+
+    const computedSignatureBuffer = Buffer.from(computedSignature, 'hex');
+    const retrievedSignatureBuffer = Buffer.from(sig, 'hex');
+    const valid = crypto.timingSafeEqual(
+      computedSignatureBuffer,
+      retrievedSignatureBuffer
+    );
+
+    if (valid) {
+      const store = admin.firestore();
+      const batch = store.batch();
+
+      const postRef = store.collection('jobs').doc(id);
+      batch.update(postRef, {
+        status: 'published'
+      });
+
+      const statusRef = store.collection('status').doc(id);
+      batch.update(statusRef, {
+        status: 'published'
+      });
+
+      return batch
+        .commit()
+        .then(async () => {
+          netlifyApprovedBuildHook();
+
+          const privateData = await store
+            .collection('private')
+            .doc(id)
+            .get();
+          const post = await postRef.get();
+
+          if (privateData.exists && post.exists) {
+            sendUserApproveNotification(privateData.data().user, post.data());
+          }
+
+          return res.status(200).send({
+            message: `Post of ${id} published`
+          });
+        })
+        .catch(err => {
+          return res.status(200).send({
+            error: true,
+            message: JSON.stringify(err)
+          });
+        });
+    }
+
+    return res.status(200).send({
+      error: true,
+      message: 'Not valid'
+    });
+  });
+});
