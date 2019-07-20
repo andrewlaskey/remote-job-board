@@ -88,7 +88,7 @@ export default {
 
   computed: {
     postDateFormatted() {
-      if (this.post && this.post.hasOwnProperty('createDate')) {
+      if (this.post && this.post.createDate) {
         return moment(this.post.createDate).format('MMM DD YYYY');
       }
 

@@ -244,9 +244,9 @@
 
 <script>
 import slugify from 'slugify';
-import { log } from '~/helpers/logs.js';
 import options from './../helpers/options.js';
 import PostDetail from './PostDetail.vue';
+import { log } from '~/helpers/logs.js';
 
 export default {
   name: 'PostForm',
@@ -292,10 +292,11 @@ export default {
       submitSuccess: false,
       errorMsg: '',
       step: 'form',
-      image: 'https://i.imgur.com/HhqxVCW.jpg',
-      name: 'Remote Work List',
-      stripeDescription: '60-day job listing',
-      amount: 7500,
+      image:
+        'https://firebasestorage.googleapis.com/v0/b/remote-job-board.appspot.com/o/images%2Fwork-remote-logo.png?alt=media&token=e10ff9b9-6ba7-4189-8ac4-f97965607a54',
+      name: 'Work Remote List',
+      stripeDescription: '30-day job listing',
+      amount: 10000,
       editorOption: {
         modules: {
           toolbar: [

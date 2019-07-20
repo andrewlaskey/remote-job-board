@@ -86,3 +86,6 @@ sw.*
 # Private config files
 firebase.config.js
 stripe.config.js
+
+# OS
+.DS_Store

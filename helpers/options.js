@@ -26,7 +26,7 @@ const options = {
   },
 
   getCategoryName(slug) {
-    if (this.categoryOptions.hasOwnProperty(slug)) {
+    if (this.categoryOptions[slug]) {
       return this.categoryOptions[slug];
     }
 

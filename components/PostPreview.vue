@@ -66,7 +66,7 @@ export default {
   },
   computed: {
     postDateFormatted() {
-      if (this.post && this.post.hasOwnProperty('createDate')) {
+      if (this.post && this.post.createDate) {
         return moment(this.post.createDate).fromNow();
       }
 
@@ -75,7 +75,7 @@ export default {
     postUrl() {
       let url = '';
 
-      if (this.post && this.post.hasOwnProperty('slug')) {
+      if (this.post && this.post.slug) {
         url = '/job/' + this.post.slug;
 
         if (this.edit) {

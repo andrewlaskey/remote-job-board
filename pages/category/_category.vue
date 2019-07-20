@@ -23,6 +23,11 @@ export default {
   components: {
     PostsList
   },
+  computed: {
+    title() {
+      return options.getCategoryName(this.$route.params.category);
+    }
+  },
   async asyncData({ app, params }) {
     try {
       const posts = await app.$fb.getPostsByCategory(params.category);
@@ -33,11 +38,6 @@ export default {
     } catch (error) {}
 
     return {};
-  },
-  computed: {
-    title() {
-      return options.getCategoryName(this.$route.params.category);
-    }
   }
 };
 </script>

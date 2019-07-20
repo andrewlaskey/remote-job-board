@@ -23,6 +23,11 @@ export default {
   components: {
     PostsList
   },
+  computed: {
+    title() {
+      return options.getTimezoneName(this.$route.params.timezone);
+    }
+  },
   async asyncData({ app, params }) {
     try {
       const posts = await app.$fb.getPostsByTimezone(params.timezone);
@@ -33,11 +38,6 @@ export default {
     } catch (error) {}
 
     return {};
-  },
-  computed: {
-    title() {
-      return options.getTimezoneName(this.$route.params.timezone);
-    }
   }
 };
 </script>
