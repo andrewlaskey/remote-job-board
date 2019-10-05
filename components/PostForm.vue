@@ -16,7 +16,9 @@
           Your new job listing was submitted and pending approval.
         </p>
         <p>
-          View your listing's status <nuxt-link v-bind:to="`status/${submitSuccess}`">here.</nuxt-link>
+          View your listing's status <nuxt-link :to="`status/${submitSuccess}`">
+            here.
+          </nuxt-link>
         </p>
       </div>
 
@@ -39,8 +41,8 @@
           </label>
           <div class="control">
             <div 
-              class="quill-editor"
               v-quill:descriptionQuillEditor="editorOption"
+              class="quill-editor"
               :content="description"
               @change="onDescriptionEditorChange($event)"
             />
@@ -53,7 +55,7 @@
           </label>
           <div class="select">
             <select v-model="category">
-              <option v-for="(value, key) in categories" v-bind:key="key" v-bind:value="key">
+              <option v-for="(value, key) in categories" :key="key" :value="key">
                 {{ value }}
               </option>
             </select>
@@ -66,7 +68,7 @@
           </label>
           <div class="select">
             <select v-model="type">
-              <option v-for="(value, key) in typeOptions" v-bind:key="key" v-bind:value="key">
+              <option v-for="(value, key) in typeOptions" :key="key" :value="key">
                 {{ value }}
               </option>
             </select>
@@ -77,8 +79,8 @@
           <label class="label">
             Timezones
           </label>
-          <label v-for="(value, key) in timezoneOptions" v-bind:key="key" class="checkbox">
-            <input type="checkbox" v-bind:value="key" v-model="timezones">
+          <label v-for="(value, key) in timezoneOptions" :key="key" class="checkbox">
+            <input v-model="timezones" type="checkbox" :value="key">
             <span>{{ value }}</span>
           </label>
         </div>
@@ -89,8 +91,8 @@
           </label>
           <div class="control">
             <div 
-              class="quill-editor"
               v-quill:howToApplyQuillEditor="editorOption"
+              class="quill-editor"
               :content="howToApply"
               @change="onHowToApplyEditorChange($event)"
             />
@@ -148,7 +150,7 @@
           </label>
           <figure v-show="hasLogo" class="image is-128x128">
             <img :src="companyLogo" alt="Your company's logo">
-            <button class="button image-reset" v-on:click.prevent="removeLogo">
+            <button class="button image-reset" @click.prevent="removeLogo">
               <span class="icon is-small">
                 <fa :icon="['fas', 'times-circle']" />
               </span>
@@ -161,7 +163,7 @@
                 class="file-input"
                 type="file"
                 name="logo" 
-                v-on:change="onFileChange"
+                @change="onFileChange"
               >
               <span class="file-cta">
                 <span class="file-icon">
@@ -177,7 +179,7 @@
 
         <div class="field">
           <div class="control">
-            <button class="button is-primary" v-on:click.prevent="showPreview">
+            <button class="button is-primary" @click.prevent="showPreview">
               Preview
             </button>
           </div>
@@ -203,13 +205,13 @@
           <hr>
         </div>
         <div class="form-actions">
-          <button class="button" v-on:click.prevent="showForm">
+          <button class="button" @click.prevent="showForm">
             Go Back
           </button>
           <button 
             class="button is-primary"
-            v-bind:class="{ 'is-loading' : isLoading }"
-            v-on:click.prevent="initCheckout"
+            :class="{ 'is-loading' : isLoading }"
+            @click.prevent="initCheckout"
           >
             Pay and Submit Job
           </button>
@@ -398,14 +400,16 @@ export default {
     },
 
     createNewPost(tokenId, email) {
-      const api = `https://us-central1-remote-job-board.cloudfunctions.net/processNewPost`;
+      const api = 'https://us-central1-remote-job-board.cloudfunctions.net';
+      const endpoint = `${process.env.STAGE}_processNewPost`;
+      const url = `${api}/${endpoint}`;
       const result = {
         success: false,
         message: ''
       };
 
       return this.$axios
-        .post(api, {
+        .post(url, {
           token: tokenId,
           email,
           post: this.post

@@ -1,3 +1,4 @@
+const stage = 'dev';
 const crypto = require('crypto');
 const functions = require('firebase-functions');
 const cors = require('cors')({ origin: true });
@@ -5,11 +6,24 @@ const axios = require('axios');
 const mailgun = require('mailgun-js');
 const sanitizeHtml = require('sanitize-html');
 const stripHtml = require('string-strip-html');
-const stripe = require('stripe')(functions.config().stripe.token);
+const admin = require('firebase-admin');
+
+const setStage = key => {
+  return `${stage}_${key}`;
+};
+
+const config = functions.config();
+const RJB_KEY = config[setStage('rjb')].key;
+const STRIPE_TOKEN = config[setStage('stripe')].token;
+const MAILGUN_KEY = config[setStage('mailgun')].key;
+const MAILGUN_DOMAIN = config[setStage('mailgun')].domain;
+const MAILGUN_FROM = config[setStage('mailgun')].from;
+const MAILGUN_ADMIN_EMAIL = config[setStage('mailgun')].adminto;
+
+const stripe = require('stripe')(STRIPE_TOKEN);
 const currency = 'usd';
 const amount = 7500;
 
-const admin = require('firebase-admin');
 admin.initializeApp();
 
 const sanitizePost = post => {
@@ -37,11 +51,14 @@ const sanitizePost = post => {
 const createJobPost = async (post, stripeCharge, userEmail) => {
   try {
     const store = admin.firestore();
-    const newPost = await store.collection('jobs').add(post);
+    const jobsColl = setStage('jobs');
+    const statusColl = setStage('status');
+    const privateColl = setStage('private');
+    const newPost = await store.collection(jobsColl).add(post);
 
     // Save public readable post status
     await store
-      .collection('status')
+      .collection(statusColl)
       .doc(newPost.id)
       .set({
         title: post.title,
@@ -52,7 +69,7 @@ const createJobPost = async (post, stripeCharge, userEmail) => {
 
     // Save private post data
     await store
-      .collection('private')
+      .collection(privateColl)
       .doc(newPost.id)
       .set({
         title: post.title,
@@ -63,19 +80,22 @@ const createJobPost = async (post, stripeCharge, userEmail) => {
 
     return newPost.id;
   } catch (err) {
+    console.log('createJobPost ERROR');
     console.log(err);
+    console.log(post, newPost, stripCharge);
     return undefined;
   }
 };
 
 const mailGunResponse = (error, body) => {
+  console.log('mailGunResponse');
   console.log(error, body);
 };
 
 const sendEmail = (to, subject, text) => {
-  const apiKey = functions.config().mailgun.key;
-  const domain = functions.config().mailgun.domain;
-  const from = functions.config().mailgun.from;
+  const apiKey = MAILGUN_KEY;
+  const domain = MAILGUN_DOMAIN;
+  const from = MAILGUN_FROM;
   const mg = mailgun({
     apiKey,
     domain
@@ -93,9 +113,10 @@ const sendEmail = (to, subject, text) => {
 };
 
 const sendUserNotification = (email, post, postId) => {
+  const { title } = post;
   const subject = 'Your job listing was received and is being reviewed';
   const text = `
-    Thank you for submitting your listing for ${post.title}!
+    Thank you for submitting your listing for ${title}!
 
     We are currently reviewing your post and will notify you when it is approved.
 
@@ -107,35 +128,50 @@ const sendUserNotification = (email, post, postId) => {
 };
 
 const sendUserApproveNotification = (email, post) => {
+  const { title, slug } = post;
   const subject = 'Your job listing was approved';
   const text = `
-    Your job listing for ${post.title} was approved!
+    Your job listing for ${title} was approved!
 
     You may view your listing here:
-    https://remote-job-board.netlify.com/job/${post.slug}
+    https://remote-job-board.netlify.com/job/${slug}
   `;
 
   sendEmail(email, subject, text);
 };
 
 const sendAdminNotification = (email, post, postId) => {
-  const adminEmail = functions.config().mailgun.adminto;
+  const {
+    title,
+    description,
+    howToApply,
+    applyUrl,
+    companyName,
+    companyUrl
+  } = post;
+  const adminEmail = MAILGUN_ADMIN_EMAIL;
 
-  const hmac = crypto.createHash('sha256', functions.config().rjb.key);
+  const hmac = crypto.createHash('sha256', RJB_KEY);
   const signature = hmac.update(postId).digest('hex');
 
   const subject = 'New post submission';
+
+  const api = 'https://us-central1-remote-job-board.cloudfunctions.net';
+  const endpoint = setStage('approvePost');
+  const query = `sig=${signature}&id=${postId}`;
+  const approveUrl = `${api}/${endpoint}?${query}`;
+
   const text = `
-    Title: ${post.title}
+    Title: ${title}
     User: ${email}
     Post ID: ${postId}
     Console: https://console.firebase.google.com/project/remote-job-board/
-    Approve: https://us-central1-remote-job-board.cloudfunctions.net/approvePost?sig=${signature}&id=${postId}
-    Description: ${stripHtml(post.description)}
-    How To Apply: ${stripHtml(post.howToApply)}
-    Apply Url: ${post.applyUrl}
-    Company Name: ${post.companyName}
-    Company Url: ${post.companyUrl}
+    Approve: ${approveUrl}
+    Description: ${stripHtml(description)}
+    How To Apply: ${stripHtml(howToApply)}
+    Apply Url: ${applyUrl}
+    Company Name: ${companyName}
+    Company Url: ${companyUrl}
   `;
 
   sendEmail(adminEmail, subject, text);
@@ -155,13 +191,14 @@ const netlifyApprovedBuildHook = () => {
   axios.post(webhookUrl, {});
 };
 
+// Functions
 /*eslint-disable */
-exports.processNewPost = functions.https.onRequest((req, res) => {
+const processNewPost = functions.https.onRequest((req, res) => {
   return cors(req, res, () => {
-    const token = req.body.token;
-    const post = req.body.post;
-    const userEmail = req.body.email;
-    const idempotencyKey = post.slug + post.createDate;
+    const { body } = req; 
+    const { token, post, email: userEmail } = body;
+    const { slug, createDate } = post;
+    const idempotencyKey = `${slug}${createDate}`;
     const resPackage = {
       error: false,
       errorType: '',
@@ -170,6 +207,9 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
       postId: false,
       message: ''
     };
+
+    console.log('CREATING NEW POST')
+    console.log(post);
 
     return stripe.charges
       .create(
@@ -185,6 +225,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
       )
       .then(
         charge => {
+          console.log('Stripe Charge Response');
           console.log(charge);
           resPackage.chargeSuccess = true;
           resPackage.message = 'charge successful';
@@ -209,6 +250,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
             });
         },
         err => {
+          console.log('Stripe ERROR');
           console.log(err);
           resPackage.error = true;
 
@@ -239,6 +281,7 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
         }
       )
       .catch(err => {
+        console.log('Other ERROR');
         console.log(err);
         resPackage.error = true;
         resPackage.errorType = 'other';
@@ -250,11 +293,11 @@ exports.processNewPost = functions.https.onRequest((req, res) => {
 });
 /*eslint-enable */
 
-exports.approvePost = functions.https.onRequest((req, res) => {
+const approvePost = functions.https.onRequest((req, res) => {
   return cors(req, res, () => {
     const { sig, id } = req.query;
 
-    const hmac = crypto.createHash('sha256', functions.config().rjb.key);
+    const hmac = crypto.createHash('sha256', RJB_KEY);
     const computedSignature = hmac.update(id).digest('hex');
 
     const computedSignatureBuffer = Buffer.from(computedSignature, 'hex');
@@ -267,13 +310,16 @@ exports.approvePost = functions.https.onRequest((req, res) => {
     if (valid) {
       const store = admin.firestore();
       const batch = store.batch();
+      const jobsColl = setStage('jobs');
+      const statusColl = setStage('status');
+      const privateColl = setStage('private');
 
-      const postRef = store.collection('jobs').doc(id);
+      const postRef = store.collection(jobsColl).doc(id);
       batch.update(postRef, {
         status: 'published'
       });
 
-      const statusRef = store.collection('status').doc(id);
+      const statusRef = store.collection(statusColl).doc(id);
       batch.update(statusRef, {
         status: 'published'
       });
@@ -284,7 +330,7 @@ exports.approvePost = functions.https.onRequest((req, res) => {
           netlifyApprovedBuildHook();
 
           const privateData = await store
-            .collection('private')
+            .collection(privateColl)
             .doc(id)
             .get();
           const post = await postRef.get();
@@ -311,3 +357,6 @@ exports.approvePost = functions.https.onRequest((req, res) => {
     });
   });
 });
+
+exports[setStage('processNewPost')] = processNewPost;
+exports[setStage('approvePost')] = approvePost;

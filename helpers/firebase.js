@@ -34,7 +34,7 @@ const getCollection = (published = true) => {
   initFirebase();
 
   const db = firebase.firestore();
-  const collection = db.collection('jobs');
+  const collection = db.collection(`${process.env.STAGE}_jobs`);
 
   if (published) {
     return collection.where('status', '==', 'published');
@@ -102,7 +102,7 @@ const fb = {
 
     try {
       const post = await db
-        .collection(`status`)
+        .collection(`${process.env.STAGE}_status`)
         .doc(id)
         .get()
         .then(doc => {

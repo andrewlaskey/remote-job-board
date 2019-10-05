@@ -8,7 +8,7 @@
           </h2>
           <div class="content">
             <p class="has-text-centered">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              Amazing jobs and employees are everywhere.<br>Leave the office behind and join the growing community of teams doing their best work remotely.
             </p>
             <p class="has-text-centered">
               <nuxt-link 

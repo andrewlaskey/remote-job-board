@@ -83,7 +83,8 @@ export default {
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
     FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
     FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+    STAGE: process.env.STAGE
   },
 
   generate: {
@@ -115,7 +116,8 @@ export default {
 
       const getCollection = (published = true) => {
         const db = firebase.firestore();
-        const collection = db.collection('jobs');
+        const jobsColl = `${process.env.STAGE}_jobs`;
+        const collection = db.collection(jobsColl);
 
         if (published) {
           return collection.where('status', '==', 'published');
@@ -191,7 +193,7 @@ export default {
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules)/
-        })
+        });
       }
     }
   }
