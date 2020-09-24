@@ -5,7 +5,7 @@ import options from './helpers/options.js';
 require('dotenv').config();
 
 export default {
-  mode: 'universal',
+  // mode: 'universal',
 
   /*
   ** Headers of the page
